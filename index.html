@@ -8,8 +8,26 @@
         margin: 0;
       }
     </style>
+    <link rel="stylesheet" type="text/css" href="styles/style.css" />
   </head>
   <body>
+    <button id="showListButton">
+      <img src="./images/Book.png" class="imgBtn" />
+    </button>
+    <div id="listContainer" class="hidden"></div>
+
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+    <div class="messageElement">
+      <div class="divImg">
+        <img src="./images/spaceBarSpam.png" class="imageSpam" />
+      </div>
+    </div>
+
+    <audio id="waterSound" src="sounds/waterSound.mp3"></audio>
+    <audio id="boatSound" src="sounds/boatSound.mp3"></audio>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>
