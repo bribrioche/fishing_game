@@ -310,6 +310,8 @@ function detectCollision() {
 
         // Affichez le message
         messageElement.style.display = "flex";
+        const image = document.getElementById("randomImage");
+        image.src = "./images/spaceBarSpam.png";
 
         // Masquez le message après 3 secondes
         setTimeout(() => {
@@ -333,19 +335,33 @@ function startSpacebarChallenge() {
   spacebarChallengeCompleted = false;
   progressBar.style.width = "0%";
 
+  // Initialiser le temps restant
+  let timeRemaining = 10;
+
+  // Afficher le temps restant au départ
+  updateRemainingTime(timeRemaining);
+
   document.addEventListener("keydown", (event) => {
     if (event.key === " ") {
       handleSpacebarClick();
     }
   });
 
+  // Mettre à jour le temps restant toutes les secondes
+  const timer = setInterval(() => {
+    timeRemaining--;
+    if (timeRemaining >= 0) {
+      updateRemainingTime(timeRemaining);
+    }
+  }, 1000);
+
+  // Arrêtez le défi après 10 secondes
   setTimeout(() => {
+    clearInterval(timer); // Arrêter le compteur
     if (!spacebarChallengeCompleted) {
       progressContainer.style.display = "none";
-    } else {
-      showCongratulationsMessage();
     }
-  }, 10000); // Arrêtez le défi après 10 secondes
+  }, 10000);
 }
 
 const progressContainer = document.querySelector(".progress-container");
@@ -360,49 +376,124 @@ function handleSpacebarClick() {
   updateProgressBar();
 }
 
-// Fonction pour mettre à jour la barre de progression
+// Modifier la fonction updateProgressBar pour gérer la couleur, le pourcentage et le temps
 function updateProgressBar() {
   if (!spacebarChallengeCompleted) {
     const goalClicks = 20;
     const percentage = (spacebarClickCount / goalClicks) * 100;
     progressBar.style.width = percentage + "%";
 
+    // Modifier la couleur en fonction de la progression
+    if (percentage < 30) {
+      progressBar.style.backgroundColor = "#FF0000"; // Rouge
+    } else if (percentage < 70) {
+      progressBar.style.backgroundColor = "#FFA500"; // Orange
+    } else {
+      progressBar.style.backgroundColor = "#00FF00"; // Vert
+    }
+
     if (spacebarClickCount >= goalClicks) {
       spacebarChallengeCompleted = true;
       progressBar.style.width = "100%";
+      progressBar.style.backgroundColor = "#00FF00"; // Vert
+      document.getElementById("timeRemaining").textContent = "0s";
       showCongratulationsMessage();
     }
   }
 }
 
+function updateRemainingTime(timeRemaining) {
+  document.getElementById("timeRemaining").textContent = `${timeRemaining}s`;
+}
+
 // Fonction pour afficher le message de félicitations
 function showCongratulationsMessage() {
-  messageElement.innerText = "Bravo !";
-  messageElement.style.display = "flex";
+  const randomString = chaineAleatoireAvecPourcentage(
+    poissonsDeMerAvecPourcentage
+  );
 
-  const randomString = generateRandomString();
+  // Mettre à jour l'attribut src de l'image
+  const randomImage = document.getElementById("randomImage");
+  randomImage.src = "./images/" + randomString + ".png";
+  messageElement.style.display = "flex";
+  progressContainer.style.display = "none";
 
   // Ajouter la chaîne à la liste
   const listContainer = document.getElementById("listContainer");
-  const listItem = document.createElement("h2");
-  listItem.textContent = randomString;
-  listContainer.appendChild(listItem);
-}
 
-// Fonction pour générer une chaîne aléatoire
-function generateRandomString() {
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const length = 8; // Longueur de la chaîne aléatoire
+  // Vérifier si la chaîne existe déjà dans la liste
+  let fishAlreadyExists = false;
+  listContainer.querySelectorAll("h2").forEach((item) => {
+    if (item.textContent.includes(randomString)) {
+      fishAlreadyExists = true;
+      let currentText = item.textContent;
+      let matches = currentText.match(/x(\d+)/);
+      if (matches) {
+        let count = parseInt(matches[1]) + 1;
+        item.textContent = `x${count} ${randomString}`;
+      } else {
+        item.textContent = `x2 ${randomString}`;
+      }
+    }
+  });
 
-  let randomString = "";
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    randomString += characters.charAt(randomIndex);
+  if (!fishAlreadyExists) {
+    const listItem = document.createElement("p");
+    const container = document.createElement("div"); // Conteneur pour l'alignement vertical
+    container.classList.add("list-item-container"); // Ajoutez une classe
+    const image = document.createElement("img");
+    image.src = `./images/${randomString}.png`;
+    image.alt = randomString;
+    image.style.width = "50px"; // Définir la largeur de l'image
+    image.style.padding = "0px 20px"; // Définir la largeur de l'image
+    container.appendChild(image);
+
+    const text = document.createElement("span"); // Utilisez un élément "span" pour le texte
+    text.textContent = ` x1 ${randomString}`;
+    container.appendChild(text);
+
+    listItem.appendChild(container);
+    listContainer.appendChild(listItem);
   }
-
-  return randomString;
 }
+
+function chaineAleatoireAvecPourcentage(chainesAvecPourcentage) {
+  const totalPourcentage = chainesAvecPourcentage.reduce(
+    (acc, chaine) => acc + chaine.pourcentage,
+    0
+  );
+  let random = Math.random() * totalPourcentage;
+
+  for (const chaine of chainesAvecPourcentage) {
+    if (random < chaine.pourcentage) {
+      return chaine.nom;
+    }
+    random -= chaine.pourcentage;
+  }
+}
+
+const poissonsDeMerAvecPourcentage = [
+  { nom: "saumon", pourcentage: 10 },
+  { nom: "bar", pourcentage: 15 },
+  { nom: "merlan", pourcentage: 20 },
+  { nom: "anguille", pourcentage: 8 },
+  { nom: "morue", pourcentage: 5 },
+  { nom: "hareng", pourcentage: 12 },
+  { nom: "anguille électrique", pourcentage: 3 },
+  { nom: "poisson-globe", pourcentage: 4 },
+  { nom: "dorade", pourcentage: 6 },
+  { nom: "sole", pourcentage: 18 },
+  { nom: "tacaud", pourcentage: 7 },
+  { nom: "maquereau", pourcentage: 9 },
+  { nom: "sardine", pourcentage: 16 },
+  { nom: "requin bleu", pourcentage: 2 },
+  { nom: "thon rouge", pourcentage: 1 },
+  { nom: "crevette", pourcentage: 14 },
+  { nom: "homard", pourcentage: 11 },
+  { nom: "calamar", pourcentage: 13 },
+  { nom: "moule", pourcentage: 17 },
+  { nom: "palourde", pourcentage: 19 },
+];
 
 // Sélectionnez le bouton et la liste
 const showListButton = document.getElementById("showListButton");

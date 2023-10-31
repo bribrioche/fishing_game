@@ -5,7 +5,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0);
   font-size: 24px;
   border-radius: 10px;
 }
@@ -18,7 +18,7 @@
   width: 50%;
   height: 30%;
   position: absolute;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0);
   font-size: 24px;
   border-radius: 10px;
 }
@@ -30,19 +30,28 @@
   transform: translate(-50%, -50%);
   display: none;
   width: 200px;
-  height: 20px;
-  background-color: #333;
-  border: 1px solid #666;
+  height: 10px;
+  background-color: #ffffffcc;
+  border: 1px solid #0842578d;
   border-radius: 5px;
   overflow: hidden;
+  padding-top: 30px;
 }
 
 .progress-bar {
   height: 100%;
-  width: 0;
-  background-color: #4caf50;
-  transition: width 0.2s ease-in;
+  width: 1%;
+  background-color: #ff0000;
 }
+
+.time-remaining {
+  position: absolute;
+  bottom: 15px; /* Ajustez cette valeur en fonction de la mise en page souhaitée */
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
 .imageSpam {
   width: 45vh;
 }
@@ -67,8 +76,9 @@ button#showListButton {
 div#listContainer {
   top: 80px; /* Ajustez cette valeur pour positionner la liste */
   left: 10px;
-  background-color: #797575;
+  background-color: #dbe8db;
   border-radius: 10px;
+  padding: 5px 0px;
 }
 
 .hidden {
@@ -79,8 +89,14 @@ div#listContainer {
   width: 40px;
 }
 
-h2 {
-  padding: 10px 50px 10px 30px;
-  margin: 5px;
+p {
+  min-height: 20px;
+  padding: 10px 20px 10px 0px;
+  margin: 0px 5px;
   background-color: #dbe8db;
+}
+
+.list-item-container {
+  display: flex;
+  align-items: center;
 }
