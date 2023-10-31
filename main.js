@@ -10,10 +10,19 @@ let controls, water, sun, boat;
 // Créez un tableau pour stocker les sphères générées
 const spheres = [];
 
+// Déclarez un objet pour stocker les poissons pêchés
+let poissonsPeches = {};
+
 init();
 animate();
 
 function init() {
+  const poissonsPechesStr = localStorage.getItem("poissonsPeches");
+
+  if (poissonsPechesStr) {
+    poissonsPeches = JSON.parse(poissonsPechesStr);
+    updateFishingList();
+  }
   //
 
   renderer = new THREE.WebGLRenderer();
@@ -186,7 +195,12 @@ function init() {
       boat.rotation.set(0, boatRotation, 0);
     }
     if (boat) {
-      //   camera.lookAt(boat.position);
+      // Mettre à jour la position de la caméra en fonction du bateau
+      const cameraDistance = 80;
+      camera.position.x = boat.position.x + cameraDistance;
+      camera.position.y = boat.position.y + cameraDistance;
+      camera.position.z = boat.position.z + cameraDistance;
+      camera.lookAt(boat.position);
     }
     requestAnimationFrame(updatePosition);
   }
@@ -389,13 +403,13 @@ function updateProgressBar() {
     } else if (percentage < 70) {
       progressBar.style.backgroundColor = "#FFA500"; // Orange
     } else {
-      progressBar.style.backgroundColor = "#00FF00"; // Vert
+      progressBar.style.backgroundColor = "#295e2b"; // Vert
     }
 
     if (spacebarClickCount >= goalClicks) {
       spacebarChallengeCompleted = true;
       progressBar.style.width = "100%";
-      progressBar.style.backgroundColor = "#00FF00"; // Vert
+      progressBar.style.backgroundColor = "#295e2b"; // Vert
       document.getElementById("timeRemaining").textContent = "0s";
       showCongratulationsMessage();
     }
@@ -406,7 +420,6 @@ function updateRemainingTime(timeRemaining) {
   document.getElementById("timeRemaining").textContent = `${timeRemaining}s`;
 }
 
-// Fonction pour afficher le message de félicitations
 function showCongratulationsMessage() {
   const randomString = chaineAleatoireAvecPourcentage(
     poissonsDeMerAvecPourcentage
@@ -418,43 +431,37 @@ function showCongratulationsMessage() {
   messageElement.style.display = "flex";
   progressContainer.style.display = "none";
 
-  // Ajouter la chaîne à la liste
-  const listContainer = document.getElementById("listContainer");
-
-  // Vérifier si la chaîne existe déjà dans la liste
-  let fishAlreadyExists = false;
-  listContainer.querySelectorAll("h2").forEach((item) => {
-    if (item.textContent.includes(randomString)) {
-      fishAlreadyExists = true;
-      let currentText = item.textContent;
-      let matches = currentText.match(/x(\d+)/);
-      if (matches) {
-        let count = parseInt(matches[1]) + 1;
-        item.textContent = `x${count} ${randomString}`;
-      } else {
-        item.textContent = `x2 ${randomString}`;
-      }
-    }
-  });
-
-  if (!fishAlreadyExists) {
-    const listItem = document.createElement("p");
-    const container = document.createElement("div"); // Conteneur pour l'alignement vertical
-    container.classList.add("list-item-container"); // Ajoutez une classe
-    const image = document.createElement("img");
-    image.src = `./images/${randomString}.png`;
-    image.alt = randomString;
-    image.style.width = "50px"; // Définir la largeur de l'image
-    image.style.padding = "0px 20px"; // Définir la largeur de l'image
-    container.appendChild(image);
-
-    const text = document.createElement("span"); // Utilisez un élément "span" pour le texte
-    text.textContent = ` x1 ${randomString}`;
-    container.appendChild(text);
-
-    listItem.appendChild(container);
-    listContainer.appendChild(listItem);
+  // Ajouter la chaîne à la liste des poissons pêchés
+  if (poissonsPeches[randomString]) {
+    poissonsPeches[randomString]++;
+  } else {
+    poissonsPeches[randomString] = 1;
   }
+
+  updateFishingList();
+
+  // Mettre à jour la barre de progression pour le nombre de types de poissons pêchés
+  const fishProgressContainer = document.querySelector(
+    ".fish-progress-container"
+  );
+  const fishProgressBar = document.querySelector(".fish-progress-bar");
+  const fishProgressPercent = document.querySelector(".text");
+
+  // Calculer le nombre de types différents de poissons pêchés
+  const numberOfFishTypes = Object.keys(poissonsPeches).length;
+  console.log(numberOfFishTypes);
+  // Mettre à jour la largeur de la barre de progression en fonction du nombre de types
+  const percentage =
+    (numberOfFishTypes / poissonsDeMerAvecPourcentage.length) * 100; // MAX_FISH_TYPES est le nombre total de types de poissons
+  fishProgressBar.style.width = percentage + "%";
+
+  // Mettre à jour le texte à l'intérieur de la barre de progression
+  fishProgressPercent.textContent = percentage.toFixed(0) + "%";
+
+  localStorage.setItem("poissonsPeches", JSON.stringify(poissonsPeches));
+  setTimeout(() => {
+    messageElement.style.display = "none";
+  }, 3000);
 }
 
 function chaineAleatoireAvecPourcentage(chainesAvecPourcentage) {
@@ -504,3 +511,29 @@ showListButton.addEventListener("click", () => {
   // Basculez la classe "hidden" sur la liste pour l'afficher ou la masquer
   listContainer.classList.toggle("hidden");
 });
+
+function updateFishingList() {
+  // Mettre à jour la liste dans le conteneur
+  const listContainer = document.getElementById("listContainer");
+  listContainer.innerHTML = ""; // Effacez la liste actuelle
+
+  for (const poisson in poissonsPeches) {
+    const listItem = document.createElement("p");
+    const container = document.createElement("div"); // Conteneur pour l'alignement vertical
+    container.classList.add("list-item-container"); // Ajoutez une classe
+    const image = document.createElement("img");
+    image.classList.add("fishImage");
+    image.src = `./images/${poisson}.png`;
+    image.alt = poisson;
+    image.style.width = "50px"; // Définir la largeur de l'image
+    image.style.padding = "0px 20px"; // Définir la largeur de l'image
+    container.appendChild(image);
+
+    const text = document.createElement("span"); // Utilisez un élément "span" pour le texte
+    text.textContent = ` x${poissonsPeches[poisson]} ${poisson}`;
+    container.appendChild(text);
+
+    listItem.appendChild(container);
+    listContainer.appendChild(listItem);
+  }
+}

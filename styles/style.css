@@ -73,6 +73,10 @@ button#showListButton {
   height: 70px;
 }
 
+button#showListButton:hover {
+  cursor: pointer;
+}
+
 div#listContainer {
   top: 80px; /* Ajustez cette valeur pour positionner la liste */
   left: 10px;
@@ -99,4 +103,44 @@ p {
 .list-item-container {
   display: flex;
   align-items: center;
+}
+
+.fishImage:hover {
+  scale: 2.5;
+  /* transform: translate(-50%, 0%); */
+  margin-left: 40px;
+  margin-right: 40px;
+  cursor: pointer;
+}
+
+.fish-progress-container {
+  position: fixed;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%); /* Pour centrer horizontalement */
+  width: 200px;
+  height: 40px;
+  background-color: #333;
+  border: 1px solid #666;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column; /* Placez les éléments en colonne */
+  align-items: center;
+}
+
+.fish-progress-bar {
+  height: 10px; /* Ajustez selon la hauteur de la barre de progression */
+  width: 0%;
+  background-color: #4caf50;
+  transition: width 0.2s ease-in;
+}
+
+.percent {
+  color: white;
+  display: flex;
+  width: 100%;
+  align-content: center;
+  justify-content: center;
+  padding: 10px 0; /* Ajustez la marge au-dessus de la barre de progression */
 }
