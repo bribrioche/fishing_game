@@ -12,6 +12,28 @@ const spheres = [];
 
 // Déclarez un objet pour stocker les poissons pêchés
 let poissonsPeches = {};
+const poissonsDeMerAvecPourcentage = [
+  { nom: "saumon", pourcentage: 10 },
+  { nom: "bar", pourcentage: 15 },
+  { nom: "merlan", pourcentage: 20 },
+  { nom: "anguille", pourcentage: 8 },
+  { nom: "morue", pourcentage: 5 },
+  { nom: "hareng", pourcentage: 12 },
+  { nom: "anguille électrique", pourcentage: 3 },
+  { nom: "poisson-globe", pourcentage: 4 },
+  { nom: "dorade", pourcentage: 6 },
+  { nom: "sole", pourcentage: 18 },
+  { nom: "tacaud", pourcentage: 7 },
+  { nom: "maquereau", pourcentage: 9 },
+  { nom: "sardine", pourcentage: 16 },
+  { nom: "requin bleu", pourcentage: 2 },
+  { nom: "thon rouge", pourcentage: 1 },
+  { nom: "crevette", pourcentage: 14 },
+  { nom: "homard", pourcentage: 11 },
+  { nom: "calamar", pourcentage: 13 },
+  { nom: "moule", pourcentage: 17 },
+  { nom: "palourde", pourcentage: 19 },
+];
 
 init();
 animate();
@@ -22,6 +44,7 @@ function init() {
   if (poissonsPechesStr) {
     poissonsPeches = JSON.parse(poissonsPechesStr);
     updateFishingList();
+    updateProgression();
   }
   //
 
@@ -440,23 +463,7 @@ function showCongratulationsMessage() {
 
   updateFishingList();
 
-  // Mettre à jour la barre de progression pour le nombre de types de poissons pêchés
-  const fishProgressContainer = document.querySelector(
-    ".fish-progress-container"
-  );
-  const fishProgressBar = document.querySelector(".fish-progress-bar");
-  const fishProgressPercent = document.querySelector(".text");
-
-  // Calculer le nombre de types différents de poissons pêchés
-  const numberOfFishTypes = Object.keys(poissonsPeches).length;
-  console.log(numberOfFishTypes);
-  // Mettre à jour la largeur de la barre de progression en fonction du nombre de types
-  const percentage =
-    (numberOfFishTypes / poissonsDeMerAvecPourcentage.length) * 100; // MAX_FISH_TYPES est le nombre total de types de poissons
-  fishProgressBar.style.width = percentage + "%";
-
-  // Mettre à jour le texte à l'intérieur de la barre de progression
-  fishProgressPercent.textContent = percentage.toFixed(0) + "%";
+  updateProgression();
 
   localStorage.setItem("poissonsPeches", JSON.stringify(poissonsPeches));
   setTimeout(() => {
@@ -478,29 +485,6 @@ function chaineAleatoireAvecPourcentage(chainesAvecPourcentage) {
     random -= chaine.pourcentage;
   }
 }
-
-const poissonsDeMerAvecPourcentage = [
-  { nom: "saumon", pourcentage: 10 },
-  { nom: "bar", pourcentage: 15 },
-  { nom: "merlan", pourcentage: 20 },
-  { nom: "anguille", pourcentage: 8 },
-  { nom: "morue", pourcentage: 5 },
-  { nom: "hareng", pourcentage: 12 },
-  { nom: "anguille électrique", pourcentage: 3 },
-  { nom: "poisson-globe", pourcentage: 4 },
-  { nom: "dorade", pourcentage: 6 },
-  { nom: "sole", pourcentage: 18 },
-  { nom: "tacaud", pourcentage: 7 },
-  { nom: "maquereau", pourcentage: 9 },
-  { nom: "sardine", pourcentage: 16 },
-  { nom: "requin bleu", pourcentage: 2 },
-  { nom: "thon rouge", pourcentage: 1 },
-  { nom: "crevette", pourcentage: 14 },
-  { nom: "homard", pourcentage: 11 },
-  { nom: "calamar", pourcentage: 13 },
-  { nom: "moule", pourcentage: 17 },
-  { nom: "palourde", pourcentage: 19 },
-];
 
 // Sélectionnez le bouton et la liste
 const showListButton = document.getElementById("showListButton");
@@ -536,4 +520,24 @@ function updateFishingList() {
     listItem.appendChild(container);
     listContainer.appendChild(listItem);
   }
+}
+
+function updateProgression() {
+  // Mettre à jour la barre de progression pour le nombre de types de poissons pêchés
+  const fishProgressContainer = document.querySelector(
+    ".fish-progress-container"
+  );
+  const fishProgressBar = document.querySelector(".fish-progress-bar");
+  const fishProgressPercent = document.querySelector(".text");
+
+  // Calculer le nombre de types différents de poissons pêchés
+  const numberOfFishTypes = Object.keys(poissonsPeches).length;
+  console.log(numberOfFishTypes);
+  // Mettre à jour la largeur de la barre de progression en fonction du nombre de types
+  const percentage =
+    (numberOfFishTypes / poissonsDeMerAvecPourcentage.length) * 100; // MAX_FISH_TYPES est le nombre total de types de poissons
+  fishProgressBar.style.width = percentage + "%";
+
+  // Mettre à jour le texte à l'intérieur de la barre de progression
+  fishProgressPercent.textContent = percentage.toFixed(0) + "%";
 }
