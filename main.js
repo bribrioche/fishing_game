@@ -364,13 +364,16 @@ function detectCollision() {
   }
 }
 
-function startSpacebarChallenge() {
-  progressContainer.style.display = "block";
+let spacebarGameRunning = false;
 
-  const goalClicks = 20;
-  spacebarClickCount = 0;
-  spacebarChallengeCompleted = false;
-  progressBar.style.width = "0%";
+function startSpacebarChallenge() {
+  if (spacebarChallengeCompleted) {
+    spacebarClickCount = 0;
+    spacebarChallengeCompleted = false;
+    progressBar.style.width = "0%";
+    updateProgressBar(); // Réinitialise la barre de progression
+  }
+  progressContainer.style.display = "block";
 
   // Initialiser le temps restant
   let timeRemaining = 10;
@@ -378,11 +381,11 @@ function startSpacebarChallenge() {
   // Afficher le temps restant au départ
   updateRemainingTime(timeRemaining);
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === " ") {
-      handleSpacebarClick();
-    }
-  });
+  if (!spacebarGameRunning) {
+    // Ajouter un nouvel écouteur d'événements pour la barre d'espace uniquement si le jeu n'est pas déjà en cours
+    document.addEventListener("keydown", handleSpacebarClick);
+    spacebarGameRunning = true;
+  }
 
   // Mettre à jour le temps restant toutes les secondes
   const timer = setInterval(() => {
@@ -397,6 +400,9 @@ function startSpacebarChallenge() {
     clearInterval(timer); // Arrêter le compteur
     if (!spacebarChallengeCompleted) {
       progressContainer.style.display = "none";
+      // Supprimer l'écouteur d'événements de la barre d'espace à la fin du jeu
+      document.removeEventListener("keydown", handleSpacebarClick);
+      spacebarGameRunning = false;
     }
   }, 10000);
 }
@@ -415,10 +421,12 @@ function handleSpacebarClick() {
 
 // Modifier la fonction updateProgressBar pour gérer la couleur, le pourcentage et le temps
 function updateProgressBar() {
+  console.log("count : " + spacebarClickCount);
   if (!spacebarChallengeCompleted) {
     const goalClicks = 20;
     const percentage = (spacebarClickCount / goalClicks) * 100;
     progressBar.style.width = percentage + "%";
+    console.log("goal : " + goalClicks);
 
     // Modifier la couleur en fonction de la progression
     if (percentage < 30) {
