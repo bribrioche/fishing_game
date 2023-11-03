@@ -66,7 +66,7 @@ init();
 animate();
 
 function init() {
-  const poissonsPechesStr = localStorage.getItem("poissonsPeches2");
+  const poissonsPechesStr = localStorage.getItem("poissonsPeches");
 
   if (poissonsPechesStr) {
     poissonsPeches = JSON.parse(poissonsPechesStr);
@@ -211,6 +211,8 @@ function init() {
         playWaterSound();
         soundIsPlaying = true;
       }
+    } else {
+      keyState[event.key] = false;
     }
   });
 
@@ -229,6 +231,8 @@ function init() {
         stopWaterSound();
         soundIsPlaying = false;
       }
+    } else {
+      keyState[event.key] = false;
     }
   });
 
@@ -437,7 +441,9 @@ function startSpacebarChallenge() {
   setTimeout(() => {
     clearInterval(timer); // Arrêter le compteur
     if (!spacebarChallengeCompleted) {
+      progressBar.style.width = "0%";
       progressContainer.style.display = "none";
+      spacebarClickCount = 0;
       // Supprimer l'écouteur d'événements de la barre d'espace à la fin du jeu
       document.removeEventListener("keydown", handleSpacebarClick);
       spacebarGameRunning = false;
@@ -487,6 +493,10 @@ function updateRemainingTime(timeRemaining) {
   document.getElementById("timeRemaining").textContent = `${timeRemaining}s`;
 }
 
+const imgRecord = document.querySelector(".imgRecord");
+const detailNewFish = document.querySelector(".detailNewFish");
+const txtNewFish = document.querySelector(".txtFish");
+
 function showCongratulationsMessage() {
   const randomFish = chaineAleatoireAvecPourcentage(
     poissonsDeMerAvecPourcentage
@@ -504,12 +514,17 @@ function showCongratulationsMessage() {
   randomImage.src = "./images/" + randomFish + ".png";
   messageElement.style.display = "flex";
   progressContainer.style.display = "none";
+  detailNewFish.style.display = "flex";
 
   // Vérifier si le poisson a déjà été pêché
   if (poissonsPeches[randomFish]) {
     // Si le poisson a déjà été pêché, augmentez le compteur de pêche
     poissonsPeches[randomFish].peches++;
     // Comparez les tailles et gardez la plus grande
+    if (poissonsPeches[randomFish].taille < randomSize) {
+      imgRecord.style.display = "block";
+    }
+
     poissonsPeches[randomFish].taille = Math.max(
       poissonsPeches[randomFish].taille,
       randomSize
@@ -517,7 +532,10 @@ function showCongratulationsMessage() {
   } else {
     // Si c'est la première pêche, ajoutez le poisson avec sa taille
     poissonsPeches[randomFish] = { taille: randomSize, peches: 1 };
+    imgRecord.style.display = "block";
   }
+  txtNewFish.textContent = randomFish + " - " + randomSize + " cm";
+  detailNewFish.style.display = "flex";
 
   updateFishingList();
 
@@ -525,7 +543,9 @@ function showCongratulationsMessage() {
 
   localStorage.setItem("poissonsPeches", JSON.stringify(poissonsPeches));
   setTimeout(() => {
+    imgRecord.style.display = "none";
     messageElement.style.display = "none";
+    detailNewFish.style.display = "none";
     spacebarChallengeCompleted = true;
   }, 3000);
 }
@@ -657,7 +677,7 @@ function updateFishingList() {
         fishDetailImage.src = fishImageSrc;
         fishPercent.textContent =
           "Chance de pêcher un(e) " + fishName + " : " + fishPourcentage + "%";
-        fishMaxSize.textContent = "Taille max. : " + fishSize + " cm";
+        fishMaxSize.textContent = "Taille max. obtenue : " + fishSize + " cm";
       } else {
         // Récupérez les informations du poisson depuis les éléments de données
         const fishName = "???";
@@ -666,9 +686,10 @@ function updateFishingList() {
 
         // Mettez à jour les éléments de détail du poisson
         fishDetailName.textContent = fishName;
-        fishDetailCount.textContent = "pas encore pêché";
+        fishDetailCount.textContent = "???";
         fishDetailImage.src = fishImageSrc;
         fishPercent.textContent = "???";
+        fishMaxSize.textContent = "???";
       }
 
       // Affichez le conteneur de détails

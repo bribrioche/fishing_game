@@ -13,6 +13,7 @@ body {
   background-color: rgba(255, 255, 255, 0);
   font-size: 24px;
   border-radius: 10px;
+  flex-direction: column;
 }
 
 .messageElement {
@@ -26,6 +27,26 @@ body {
   background-color: rgba(255, 255, 255, 0);
   font-size: 24px;
   border-radius: 10px;
+}
+.detailNewFish {
+  padding-top: 10px;
+  display: none;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
+}
+.txtFish {
+  justify-self: center;
+  align-self: center;
+  font-size: xx-large;
+}
+
+.imgRecord {
+  display: none;
+  width: 30px;
+  height: 25px;
+  rotate: 30deg;
+  transform: translate(-15px, -15px);
 }
 
 .progress-container {
@@ -45,7 +66,7 @@ body {
 
 .progress-bar {
   height: 100%;
-  width: 1%;
+  width: 0%;
   background-color: #ff0000;
 }
 
