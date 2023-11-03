@@ -2,12 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>My first three.js app</title>
-    <style>
-      body {
-        margin: 0;
-      }
-    </style>
+    <title>Aventure Aquatique : Pêche à Gogo</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" type="text/css" href="styles/style.css" />
   </head>
   <body>
@@ -21,7 +21,23 @@
     <button id="showListButton">
       <img src="./images/Book.png" class="imgBtn" />
     </button>
-    <div id="listContainer" class="hidden"></div>
+    <div id="listContainer" class="hidden">
+      <div class="fish-grid"></div>
+    </div>
+    <div id="fishDetails" class="fish-details">
+      <h2 id="fishDetailName" class="detail">Nom du poisson</h2>
+      <img
+        id="fishDetailImage"
+        src="images/unknown.png"
+        alt="???"
+        class="fish-detail-image"
+      />
+      <div class="details">
+        <p id="fishDetailCount" class="detail">Nombre de fois pêché: 0</p>
+        <p id="fishPercent" class="detail">Pourcentage</p>
+        <p id="fishMaxSize" class="detail">Taille</p>
+      </div>
+    </div>
 
     <div class="progress-container">
       <div class="time-remaining">

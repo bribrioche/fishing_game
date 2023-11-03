@@ -13,33 +13,60 @@ const spheres = [];
 // Déclarez un objet pour stocker les poissons pêchés
 let poissonsPeches = {};
 const poissonsDeMerAvecPourcentage = [
-  { nom: "saumon", pourcentage: 10 },
-  { nom: "bar", pourcentage: 15 },
-  { nom: "merlan", pourcentage: 20 },
-  { nom: "anguille", pourcentage: 8 },
-  { nom: "morue", pourcentage: 5 },
-  { nom: "hareng", pourcentage: 12 },
-  { nom: "anguille électrique", pourcentage: 3 },
-  { nom: "poisson-globe", pourcentage: 4 },
-  { nom: "dorade", pourcentage: 6 },
-  { nom: "sole", pourcentage: 18 },
-  { nom: "tacaud", pourcentage: 7 },
-  { nom: "maquereau", pourcentage: 9 },
-  { nom: "sardine", pourcentage: 16 },
-  { nom: "requin bleu", pourcentage: 2 },
-  { nom: "thon rouge", pourcentage: 1 },
-  { nom: "crevette", pourcentage: 14 },
-  { nom: "homard", pourcentage: 11 },
-  { nom: "calamar", pourcentage: 13 },
-  { nom: "moule", pourcentage: 17 },
-  { nom: "palourde", pourcentage: 19 },
+  { nom: "saumon", pourcentage: 10, tailleMinimale: 45, tailleMaximale: 150 },
+  { nom: "bar", pourcentage: 15, tailleMinimale: 40, tailleMaximale: 100 },
+  { nom: "merlan", pourcentage: 20, tailleMinimale: 30, tailleMaximale: 70 },
+  { nom: "anguille", pourcentage: 8, tailleMinimale: 40, tailleMaximale: 150 },
+  { nom: "morue", pourcentage: 5, tailleMinimale: 50, tailleMaximale: 180 },
+  { nom: "hareng", pourcentage: 12, tailleMinimale: 20, tailleMaximale: 40 },
+  {
+    nom: "anguille électrique",
+    pourcentage: 3,
+    tailleMinimale: 170,
+    tailleMaximale: 250,
+  },
+  {
+    nom: "poisson-globe",
+    pourcentage: 4,
+    tailleMinimale: 12,
+    tailleMaximale: 40,
+  },
+  { nom: "dorade", pourcentage: 6, tailleMinimale: 40, tailleMaximale: 70 },
+  { nom: "sole", pourcentage: 18, tailleMinimale: 25, tailleMaximale: 70 },
+  { nom: "tacaud", pourcentage: 7, tailleMinimale: 21, tailleMaximale: 40 },
+  { nom: "maquereau", pourcentage: 9, tailleMinimale: 30, tailleMaximale: 60 },
+  { nom: "sardine", pourcentage: 16, tailleMinimale: 11, tailleMaximale: 15 },
+  {
+    nom: "requin bleu",
+    pourcentage: 2,
+    tailleMinimale: 180,
+    tailleMaximale: 383,
+  },
+  {
+    nom: "thon rouge",
+    pourcentage: 1,
+    tailleMinimale: 150,
+    tailleMaximale: 300,
+  },
+  { nom: "crevette", pourcentage: 14, tailleMinimale: 3, tailleMaximale: 5 },
+  { nom: "homard", pourcentage: 11, tailleMinimale: 25, tailleMaximale: 60 },
+  {
+    nom: "calamar",
+    pourcentage: 13,
+    tailleMinimale: 1200,
+    tailleMaximale: 1400,
+  },
+  { nom: "moule", pourcentage: 17, tailleMinimale: 4, tailleMaximale: 5 },
+  { nom: "palourde", pourcentage: 19, tailleMinimale: 3.5, tailleMaximale: 4 },
 ];
+
+let spacebarChallengeCompleted = true;
 
 init();
 animate();
 
 function init() {
-  const poissonsPechesStr = localStorage.getItem("poissonsPeches");
+  const poissonsPechesStr = localStorage.getItem("poissonsPeches2");
 
   if (poissonsPechesStr) {
     poissonsPeches = JSON.parse(poissonsPechesStr);
@@ -174,49 +201,59 @@ function init() {
 
   // Ajoutez un gestionnaire d'événements pour la touche "ArrowUp" enfoncée
   document.addEventListener("keydown", (event) => {
-    keyState[event.key] = true;
+    if (spacebarChallengeCompleted) {
+      // Vérifiez si le défi de la barre d'espace n'est pas encore terminé
+      keyState[event.key] = true;
 
-    // Si "ArrowUp" est enfoncé et le son n'est pas déjà en cours de lecture, activez le son
-    if (event.key === "ArrowUp" && !soundIsPlaying) {
-      playBoatSound();
-      playWaterSound();
-      soundIsPlaying = true;
+      // Si "ArrowUp" est enfoncé et le son n'est pas déjà en cours de lecture, activez le son
+      if (event.key === "ArrowUp" && !soundIsPlaying) {
+        playBoatSound();
+        playWaterSound();
+        soundIsPlaying = true;
+      }
     }
   });
 
   // Ajoutez un gestionnaire d'événements pour la touche "ArrowUp" relâchée
   document.addEventListener("keyup", (event) => {
-    keyState[event.key] = false;
+    if (spacebarChallengeCompleted) {
+      // Vérifiez si le défi de la barre d'espace n'est pas encore terminé
+      keyState[event.key] = false;
 
-    // Si la touche "ArrowUp" est relâchée et aucune autre touche "ArrowUp" n'est enfoncée, arrêtez le son
-    if (
-      event.key === "ArrowUp" &&
-      !Object.values(keyState).some((key) => key === true)
-    ) {
-      stopBoatSound();
-      stopWaterSound();
-      soundIsPlaying = false;
+      // Si la touche "ArrowUp" est relâchée et aucune autre touche "ArrowUp" n'est enfoncée, arrêtez le son
+      if (
+        event.key === "ArrowUp" &&
+        !Object.values(keyState).some((key) => key === true)
+      ) {
+        stopBoatSound();
+        stopWaterSound();
+        soundIsPlaying = false;
+      }
     }
   });
 
   function updatePosition() {
-    if (keyState["ArrowUp"]) {
-      boatSound.volume = 0.15;
+    if (spacebarChallengeCompleted) {
+      // Vérifiez si le défi de la barre d'espace n'est pas encore terminé
+      if (keyState["z"]) {
+        boatSound.volume = 0.15;
 
-      boat.position.z -= Math.sin(boatRotation) * moveSpeed;
-      boat.position.x += Math.cos(boatRotation) * moveSpeed;
-    }
-    if (keyState["ArrowLeft"]) {
-      boatSound.volume = 0.2;
-      boatRotation += Math.PI / 180;
-      boat.rotation.set(0, boatRotation, 0);
-    }
-    if (keyState["ArrowRight"]) {
-      boatSound.volume = 0.2;
+        boat.position.z -= Math.sin(boatRotation) * moveSpeed;
+        boat.position.x += Math.cos(boatRotation) * moveSpeed;
+      }
+      if (keyState["q"]) {
+        boatSound.volume = 0.2;
+        boatRotation += Math.PI / 180;
+        boat.rotation.set(0, boatRotation, 0);
+      }
+      if (keyState["d"]) {
+        boatSound.volume = 0.2;
 
-      boatRotation -= Math.PI / 180;
-      boat.rotation.set(0, boatRotation, 0);
+        boatRotation -= Math.PI / 180;
+        boat.rotation.set(0, boatRotation, 0);
+      }
     }
+
     if (boat) {
       // Mettre à jour la position de la caméra en fonction du bateau
       const cameraDistance = 80;
@@ -350,6 +387,13 @@ function detectCollision() {
         const image = document.getElementById("randomImage");
         image.src = "./images/spaceBarSpam.png";
 
+        if (spacebarChallengeCompleted) {
+          spacebarClickCount = 0;
+          spacebarChallengeCompleted = false;
+          progressBar.style.width = "0%";
+          updateProgressBar(); // Réinitialise la barre de progression
+        }
+
         // Masquez le message après 3 secondes
         setTimeout(() => {
           messageElement.style.display = "none";
@@ -367,12 +411,6 @@ function detectCollision() {
 let spacebarGameRunning = false;
 
 function startSpacebarChallenge() {
-  if (spacebarChallengeCompleted) {
-    spacebarClickCount = 0;
-    spacebarChallengeCompleted = false;
-    progressBar.style.width = "0%";
-    updateProgressBar(); // Réinitialise la barre de progression
-  }
   progressContainer.style.display = "block";
 
   // Initialiser le temps restant
@@ -383,7 +421,7 @@ function startSpacebarChallenge() {
 
   if (!spacebarGameRunning) {
     // Ajouter un nouvel écouteur d'événements pour la barre d'espace uniquement si le jeu n'est pas déjà en cours
-    document.addEventListener("keydown", handleSpacebarClick);
+    document.addEventListener("keyup", handleSpacebarClick);
     spacebarGameRunning = true;
   }
 
@@ -411,7 +449,6 @@ const progressContainer = document.querySelector(".progress-container");
 const progressBar = document.querySelector(".progress-bar");
 
 let spacebarClickCount = 0;
-let spacebarChallengeCompleted = false;
 
 // Fonction pour incrémenter le compteur de clics sur la barre d'espace
 function handleSpacebarClick() {
@@ -437,8 +474,7 @@ function updateProgressBar() {
       progressBar.style.backgroundColor = "#295e2b"; // Vert
     }
 
-    if (spacebarClickCount >= goalClicks) {
-      spacebarChallengeCompleted = true;
+    if (spacebarClickCount == goalClicks) {
       progressBar.style.width = "100%";
       progressBar.style.backgroundColor = "#295e2b"; // Vert
       document.getElementById("timeRemaining").textContent = "0s";
@@ -452,21 +488,35 @@ function updateRemainingTime(timeRemaining) {
 }
 
 function showCongratulationsMessage() {
-  const randomString = chaineAleatoireAvecPourcentage(
+  const randomFish = chaineAleatoireAvecPourcentage(
     poissonsDeMerAvecPourcentage
+  );
+  const fishData = poissonsDeMerAvecPourcentage.find(
+    (fish) => fish.nom === randomFish
+  );
+  const randomSize = generateRandomSize(
+    fishData.tailleMinimale,
+    fishData.tailleMaximale
   );
 
   // Mettre à jour l'attribut src de l'image
   const randomImage = document.getElementById("randomImage");
-  randomImage.src = "./images/" + randomString + ".png";
+  randomImage.src = "./images/" + randomFish + ".png";
   messageElement.style.display = "flex";
   progressContainer.style.display = "none";
 
-  // Ajouter la chaîne à la liste des poissons pêchés
-  if (poissonsPeches[randomString]) {
-    poissonsPeches[randomString]++;
+  // Vérifier si le poisson a déjà été pêché
+  if (poissonsPeches[randomFish]) {
+    // Si le poisson a déjà été pêché, augmentez le compteur de pêche
+    poissonsPeches[randomFish].peches++;
+    // Comparez les tailles et gardez la plus grande
+    poissonsPeches[randomFish].taille = Math.max(
+      poissonsPeches[randomFish].taille,
+      randomSize
+    );
   } else {
-    poissonsPeches[randomString] = 1;
+    // Si c'est la première pêche, ajoutez le poisson avec sa taille
+    poissonsPeches[randomFish] = { taille: randomSize, peches: 1 };
   }
 
   updateFishingList();
@@ -476,7 +526,12 @@ function showCongratulationsMessage() {
   localStorage.setItem("poissonsPeches", JSON.stringify(poissonsPeches));
   setTimeout(() => {
     messageElement.style.display = "none";
+    spacebarChallengeCompleted = true;
   }, 3000);
+}
+
+function generateRandomSize(min, max) {
+  return (Math.random() * (max - min) + min).toFixed(2);
 }
 
 function chaineAleatoireAvecPourcentage(chainesAvecPourcentage) {
@@ -504,30 +559,127 @@ showListButton.addEventListener("click", () => {
   listContainer.classList.toggle("hidden");
 });
 
+// Sélectionnez le conteneur de détails de poisson
+const fishDetails = document.getElementById("fishDetails");
+fishDetails.classList.add("hidden");
+// Sélectionnez les éléments de détail du poisson
+const fishDetailImage = document.getElementById("fishDetailImage");
+const fishDetailName = document.getElementById("fishDetailName");
+const fishDetailCount = document.getElementById("fishDetailCount");
+const fishPercent = document.getElementById("fishPercent");
+const fishMaxSize = document.getElementById("fishMaxSize");
+
 function updateFishingList() {
-  // Mettre à jour la liste dans le conteneur
-  const listContainer = document.getElementById("listContainer");
-  listContainer.innerHTML = ""; // Effacez la liste actuelle
+  // Sélectionnez la grille des poissons
+  const fishGrid = document.querySelector(".fish-grid");
+
+  // Effacez la grille actuelle
+  fishGrid.innerHTML = "";
 
   for (const poisson in poissonsPeches) {
-    const listItem = document.createElement("p");
-    const container = document.createElement("div"); // Conteneur pour l'alignement vertical
-    container.classList.add("list-item-container"); // Ajoutez une classe
+    const fishItem = document.createElement("div");
+    fishItem.classList.add("fish-item");
+
     const image = document.createElement("img");
-    image.classList.add("fishImage");
+    image.classList.add("fish-image");
     image.src = `./images/${poisson}.png`;
     image.alt = poisson;
-    image.style.width = "50px"; // Définir la largeur de l'image
-    image.style.padding = "0px 20px"; // Définir la largeur de l'image
-    container.appendChild(image);
 
-    const text = document.createElement("span"); // Utilisez un élément "span" pour le texte
-    text.textContent = ` x${poissonsPeches[poisson]} ${poisson}`;
-    container.appendChild(text);
+    const text = document.createElement("p");
+    text.classList.add("fish-name");
+    text.textContent = `${poisson}`;
 
-    listItem.appendChild(container);
-    listContainer.appendChild(listItem);
+    fishItem.appendChild(image);
+    fishItem.appendChild(text);
+    fishGrid.appendChild(fishItem);
   }
+
+  // Ajoutez des éléments pour les poissons manquants
+  for (
+    let i = 0;
+    i <
+    poissonsDeMerAvecPourcentage.length - Object.keys(poissonsPeches).length;
+    i++
+  ) {
+    const fishItem = document.createElement("div");
+    fishItem.classList.add("fish-item");
+
+    const image = document.createElement("img");
+    image.classList.add("fish-image");
+    image.src = `./images/unknown.png`;
+    image.alt = "???";
+
+    const text = document.createElement("p");
+    text.classList.add("fish-name");
+    text.textContent = "???";
+
+    fishItem.appendChild(image);
+    fishItem.appendChild(text);
+    fishGrid.appendChild(fishItem);
+  }
+
+  // Sélectionnez tous les éléments .fish-item
+  const fishItems = document.querySelectorAll(".fish-item");
+
+  // Parcourez tous les éléments .fish-item et ajoutez un gestionnaire d'événements pour chaque élément
+  fishItems.forEach((fishItem) => {
+    fishItem.addEventListener("mouseover", () => {
+      let fishFound;
+      for (const poisson in poissonsPeches) {
+        if (fishItem.textContent == poisson) {
+          fishFound = poisson;
+        }
+      }
+
+      if (fishFound) {
+        const fishCount = poissonsPeches[fishFound].peches || 0; // Nombre de fois pêché
+        const fishImageSrc = `./images/${fishFound}.png`;
+        const fishName = fishFound;
+        const fishSize = poissonsPeches[fishFound].taille;
+
+        // Recherche du pourcentage dans poissonsDeMerAvecPourcentage
+        let fishPourcentage = 0;
+        for (const fish of poissonsDeMerAvecPourcentage) {
+          if (fish.nom === fishName) {
+            fishPourcentage = fish.pourcentage;
+            break; // Sortez de la boucle une fois que vous avez trouvé le poisson
+          }
+        }
+
+        // Mettez à jour les éléments de détail du poisson
+        fishDetailName.textContent = fishName.toLocaleUpperCase();
+        fishDetailCount.textContent =
+          fishName.charAt(0).toUpperCase() +
+          fishName.slice(1) +
+          "s" +
+          " pêché(e)s : " +
+          fishCount;
+        fishDetailImage.src = fishImageSrc;
+        fishPercent.textContent =
+          "Chance de pêcher un(e) " + fishName + " : " + fishPourcentage + "%";
+        fishMaxSize.textContent = "Taille max. : " + fishSize + " cm";
+      } else {
+        // Récupérez les informations du poisson depuis les éléments de données
+        const fishName = "???";
+        // const fishCount =
+        const fishImageSrc = `./images/unknown.png`;
+
+        // Mettez à jour les éléments de détail du poisson
+        fishDetailName.textContent = fishName;
+        fishDetailCount.textContent = "pas encore pêché";
+        fishDetailImage.src = fishImageSrc;
+        fishPercent.textContent = "???";
+      }
+
+      // Affichez le conteneur de détails
+      fishDetails.classList.remove("hidden");
+    });
+
+    fishItem.addEventListener("mouseout", () => {
+      // Masquez le conteneur de détails lorsque la souris quitte l'élément .fish-item
+      fishDetails.classList.add("hidden");
+    });
+  });
 }
 
 function updateProgression() {
@@ -549,3 +701,15 @@ function updateProgression() {
   // Mettre à jour le texte à l'intérieur de la barre de progression
   fishProgressPercent.textContent = percentage.toFixed(0) + "%";
 }
+
+// Ajoutez un gestionnaire d'événements pour le bouton
+showListButton.addEventListener("click", function () {
+  // Vérifiez si le bouton a déjà la classe "clicked"
+  if (this.classList.contains("clicked")) {
+    // Si oui, enlevez la classe "clicked"
+    this.classList.remove("clicked");
+  } else {
+    // Sinon, ajoutez la classe "clicked" pour changer le style
+    this.classList.add("clicked");
+  }
+});
