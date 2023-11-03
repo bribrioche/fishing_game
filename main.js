@@ -62,6 +62,7 @@ const poissonsDeMerAvecPourcentage = [
 
 let spacebarChallengeCompleted = true;
 
+splashScreen();
 init();
 animate();
 
@@ -224,7 +225,7 @@ function init() {
 
       // Si la touche "ArrowUp" est relâchée et aucune autre touche "ArrowUp" n'est enfoncée, arrêtez le son
       if (
-        event.key === "ArrowUp" &&
+        (event.key === "ArrowUp" || event.key === "z") &&
         !Object.values(keyState).some((key) => key === true)
       ) {
         stopBoatSound();
@@ -239,18 +240,18 @@ function init() {
   function updatePosition() {
     if (spacebarChallengeCompleted) {
       // Vérifiez si le défi de la barre d'espace n'est pas encore terminé
-      if (keyState["z"]) {
+      if (keyState["z"] || keyState["ArrowUp"]) {
         boatSound.volume = 0.15;
 
         boat.position.z -= Math.sin(boatRotation) * moveSpeed;
         boat.position.x += Math.cos(boatRotation) * moveSpeed;
       }
-      if (keyState["q"]) {
+      if (keyState["q"] || keyState["ArrowLeft"]) {
         boatSound.volume = 0.2;
         boatRotation += Math.PI / 180;
         boat.rotation.set(0, boatRotation, 0);
       }
-      if (keyState["d"]) {
+      if (keyState["d"] || keyState["ArrowRight"]) {
         boatSound.volume = 0.2;
 
         boatRotation -= Math.PI / 180;
@@ -457,19 +458,19 @@ const progressBar = document.querySelector(".progress-bar");
 let spacebarClickCount = 0;
 
 // Fonction pour incrémenter le compteur de clics sur la barre d'espace
-function handleSpacebarClick() {
-  spacebarClickCount++;
-  updateProgressBar();
+function handleSpacebarClick(event) {
+  if (event.key === " ") {
+    spacebarClickCount++;
+    updateProgressBar();
+  }
 }
 
 // Modifier la fonction updateProgressBar pour gérer la couleur, le pourcentage et le temps
 function updateProgressBar() {
-  console.log("count : " + spacebarClickCount);
   if (!spacebarChallengeCompleted) {
     const goalClicks = 20;
     const percentage = (spacebarClickCount / goalClicks) * 100;
     progressBar.style.width = percentage + "%";
-    console.log("goal : " + goalClicks);
 
     // Modifier la couleur en fonction de la progression
     if (percentage < 30) {
@@ -534,7 +535,12 @@ function showCongratulationsMessage() {
     poissonsPeches[randomFish] = { taille: randomSize, peches: 1 };
     imgRecord.style.display = "block";
   }
-  txtNewFish.textContent = randomFish + " - " + randomSize + " cm";
+  txtNewFish.textContent =
+    randomFish.charAt(0).toUpperCase() +
+    randomFish.substring(1) +
+    " - " +
+    randomSize +
+    " cm";
   detailNewFish.style.display = "flex";
 
   updateFishingList();
@@ -670,7 +676,7 @@ function updateFishingList() {
         fishDetailName.textContent = fishName.toLocaleUpperCase();
         fishDetailCount.textContent =
           fishName.charAt(0).toUpperCase() +
-          fishName.slice(1) +
+          fishName.split(1) +
           "s" +
           " pêché(e)s : " +
           fishCount;
@@ -713,7 +719,6 @@ function updateProgression() {
 
   // Calculer le nombre de types différents de poissons pêchés
   const numberOfFishTypes = Object.keys(poissonsPeches).length;
-  console.log(numberOfFishTypes);
   // Mettre à jour la largeur de la barre de progression en fonction du nombre de types
   const percentage =
     (numberOfFishTypes / poissonsDeMerAvecPourcentage.length) * 100; // MAX_FISH_TYPES est le nombre total de types de poissons
@@ -734,3 +739,35 @@ showListButton.addEventListener("click", function () {
     this.classList.add("clicked");
   }
 });
+
+function splashScreen() {
+  document.addEventListener("DOMContentLoaded", () => {
+    const loadingBar = document.querySelector(".loading-bar"); // Mettez à jour la classe ici
+    const splashScreen = document.querySelector(".splashScreen");
+
+    let width = 0;
+    const duration = 1000; // 1.5 secondes
+    const interval = 10; // Mettez à jour la barre de chargement toutes les 20 ms
+    const increment = (interval / duration) * 100;
+    let currentPercent = 0;
+
+    function updateLoadingProgressBar() {
+      if (width >= 100) {
+        clearInterval(loadingInterval);
+        setTimeout(() => {
+          // Disparition du splash screen après la fin de la barre de chargement
+          splashScreen.style.opacity = 0;
+          setTimeout(() => {
+            splashScreen.style.display = "none";
+          }, 1000); // Attendre 1 seconde pour que le splash screen disparaisse complètement
+        }, 1000); // Attendre 1 seconde après l'atteinte de 100 % pour laisser le temps à l'animation de disparaître
+      } else {
+        width += increment;
+        currentPercent += increment;
+        loadingBar.style.width = `${width}%`;
+      }
+    }
+
+    const loadingInterval = setInterval(updateLoadingProgressBar, interval);
+  });
+}
