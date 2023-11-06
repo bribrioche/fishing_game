@@ -55,8 +55,8 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   display: none;
-  width: 200px;
-  height: 10px;
+  width: 500px;
+  height: 100px;
   background-color: #ffffffcc;
   border: 1px solid #0842578d;
   border-radius: 5px;
@@ -221,7 +221,6 @@ p {
   max-width: 400px;
   right: 10px;
   top: 10px;
-  /* transform: translate(50%, -50%); */
   z-index: 3;
   border-radius: 5px;
   border: #666 2px solid;
@@ -280,4 +279,74 @@ p {
   height: 100%;
   background-color: #ffffff;
   border-radius: 5px 0 0 5px;
+}
+
+.progress-bar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 10px;
+  background-color: #ccc; /* Couleur de fond de la barre */
+}
+
+.segment-1 {
+  background-color: #ff0000;
+  width: 10%; /* Couleur du premier segment */
+}
+
+.segment-2 {
+  background-color: #ff6a00; /* Couleur du deuxième segment */
+  transition: width 0.5s;
+}
+
+.segment-3 {
+  background-color: rgb(44, 119, 56); /* Couleur du troisième segment */
+}
+
+.segment-4 {
+  background-color: #ff6a00;
+  transition: width 0.5s; /* Couleur du quatrième segment */
+}
+
+.segment-5 {
+  background-color: #ff0000;
+  width: 10%; /* Couleur du cinquième segment */
+}
+
+.game-container {
+  position: relative;
+  width: 100%;
+  height: 300px; /* Ajustez la hauteur en fonction de vos besoins */
+}
+
+.horizontal-bar-container {
+  width: 100%; /* Ajustez cette valeur si nécessaire */
+  height: 40px;
+  background-color: #333;
+  display: flex;
+  position: relative;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.bar-segment {
+  height: 100%;
+  transition: background-color 1s;
+}
+
+.vertical-bar {
+  width: 3px; /* Largeur de la barre verticale */
+  height: 100%;
+  background-color: rgb(44, 2, 2); /* Couleur de la barre verticale */
+  border: #ccc 1px solid;
+  position: absolute;
+  top: 0;
+  left: 0; /* Ajustez la position initiale si nécessaire */
+}
+
+.progress-bar-segment {
+  height: 100%;
+  position: relative;
+  overflow: hidden; /* Cacher le contenu qui dépasse */
 }

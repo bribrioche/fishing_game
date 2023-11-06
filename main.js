@@ -62,6 +62,18 @@ const poissonsDeMerAvecPourcentage = [
 
 let spacebarChallengeCompleted = true;
 
+// Sélectionnez le conteneur de détails de poisson
+const fishDetails = document.getElementById("fishDetails");
+fishDetails.classList.add("hidden");
+// Sélectionnez les éléments de détail du poisson
+const fishDetailImage = document.getElementById("fishDetailImage");
+const fishDetailName = document.getElementById("fishDetailName");
+const fishDetailCount = document.getElementById("fishDetailCount");
+const fishPercent = document.getElementById("fishPercent");
+const fishMaxSize = document.getElementById("fishMaxSize");
+// Sélectionnez la grille des poissons
+const fishGrid = document.querySelector(".fish-grid");
+
 splashScreen();
 init();
 animate();
@@ -73,6 +85,8 @@ function init() {
     poissonsPeches = JSON.parse(poissonsPechesStr);
     updateFishingList();
     updateProgression();
+  } else {
+    setEmptyFishingList();
   }
   //
 
@@ -440,14 +454,24 @@ function startSpacebarChallenge() {
 
   // Arrêtez le défi après 10 secondes
   setTimeout(() => {
-    clearInterval(timer); // Arrêter le compteur
+    // Arrêter le compteur
+    clearInterval(timer);
     if (!spacebarChallengeCompleted) {
+      messageElement.style.display = "flex";
       progressBar.style.width = "0%";
       progressContainer.style.display = "none";
       spacebarClickCount = 0;
+      const image = document.getElementById("randomImage");
+      image.src = "./images/failed.png";
       // Supprimer l'écouteur d'événements de la barre d'espace à la fin du jeu
       document.removeEventListener("keydown", handleSpacebarClick);
       spacebarGameRunning = false;
+
+      // Cacher l'élément message après 3 secondes
+      setTimeout(() => {
+        messageElement.style.display = "none";
+        spacebarChallengeCompleted = true;
+      }, 3000);
     }
   }, 10000);
 }
@@ -585,20 +609,27 @@ showListButton.addEventListener("click", () => {
   listContainer.classList.toggle("hidden");
 });
 
-// Sélectionnez le conteneur de détails de poisson
-const fishDetails = document.getElementById("fishDetails");
-fishDetails.classList.add("hidden");
-// Sélectionnez les éléments de détail du poisson
-const fishDetailImage = document.getElementById("fishDetailImage");
-const fishDetailName = document.getElementById("fishDetailName");
-const fishDetailCount = document.getElementById("fishDetailCount");
-const fishPercent = document.getElementById("fishPercent");
-const fishMaxSize = document.getElementById("fishMaxSize");
+function setEmptyFishingList() {
+  for (let i = 0; i < poissonsDeMerAvecPourcentage.length; i++) {
+    const fishItem = document.createElement("div");
+    fishItem.classList.add("fish-item");
+
+    const image = document.createElement("img");
+    image.classList.add("fish-image");
+    image.src = `./images/unknown.png`;
+    image.alt = "???";
+
+    const text = document.createElement("p");
+    text.classList.add("fish-name");
+    text.textContent = "???";
+
+    fishItem.appendChild(image);
+    fishItem.appendChild(text);
+    fishGrid.appendChild(fishItem);
+  }
+}
 
 function updateFishingList() {
-  // Sélectionnez la grille des poissons
-  const fishGrid = document.querySelector(".fish-grid");
-
   // Effacez la grille actuelle
   fishGrid.innerHTML = "";
 
@@ -674,12 +705,14 @@ function updateFishingList() {
 
         // Mettez à jour les éléments de détail du poisson
         fishDetailName.textContent = fishName.toLocaleUpperCase();
-        fishDetailCount.textContent =
-          fishName.charAt(0).toUpperCase() +
-          fishName.split(1) +
-          "s" +
-          " pêché(e)s : " +
-          fishCount;
+        if (fishCount > 1) {
+          fishDetailCount.textContent =
+            upcaseFirstLetter(plural(fishName)) + " pêché(e)s : " + fishCount;
+        } else {
+          fishDetailCount.textContent =
+            upcaseFirstLetter(fishName) + " pêché(e) : " + fishCount;
+        }
+
         fishDetailImage.src = fishImageSrc;
         fishPercent.textContent =
           "Chance de pêcher un(e) " + fishName + " : " + fishPourcentage + "%";
@@ -746,7 +779,7 @@ function splashScreen() {
     const splashScreen = document.querySelector(".splashScreen");
 
     let width = 0;
-    const duration = 1000; // 1.5 secondes
+    const duration = 500; // 1.5 secondes
     const interval = 10; // Mettez à jour la barre de chargement toutes les 20 ms
     const increment = (interval / duration) * 100;
     let currentPercent = 0;
@@ -770,4 +803,24 @@ function splashScreen() {
 
     const loadingInterval = setInterval(updateLoadingProgressBar, interval);
   });
+}
+
+function plural(singular) {
+  if (singular.substring(singular.length - 3) == "eau") {
+    return singular + "x";
+  } else if (singular.includes(" ")) {
+    const words = singular.split(" ");
+    const pluralWords = words.map((word) => word + "s");
+
+    // Rejoindre les mots avec un espace pour former la nouvelle chaîne
+    const newString = pluralWords.join(" ");
+
+    return newString;
+  } else {
+    return singular + "s";
+  }
+}
+
+function upcaseFirstLetter(word) {
+  return word.charAt(0).toUpperCase() + word.substring(1);
 }
