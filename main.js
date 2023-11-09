@@ -1,5 +1,4 @@
 import * as THREE from "three";
-
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { Water } from "three/addons/objects/Water.js";
 import { Sky } from "three/addons/objects/Sky.js";
@@ -7,15 +6,23 @@ import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 
 let camera, scene, renderer;
 let controls, water, sun, boat;
+
 let moveSpeed = 0.5;
 let boatRotation = 0;
-// Créez un tableau pour stocker les sphères générées
-const spheres = [];
-let randomFish;
-let spacebarClickCount = 0;
+let counter = 0;
 
-// Déclarez un objet pour stocker les poissons pêchés
+let spheres = [];
+let colors = [];
+
 let poissonsPeches = {};
+
+let spacebarChallengeCompleted = true;
+let isClicked = false;
+let spacebarGameRunning = false;
+
+let randomFish;
+let timeout;
+
 const poissonsDeMerAvecPourcentage = [
   { nom: "saumon", pourcentage: 10, tailleMinimale: 45, tailleMaximale: 150 },
   { nom: "bar", pourcentage: 15, tailleMinimale: 40, tailleMaximale: 100 },
@@ -69,32 +76,35 @@ const poissonsDeMerAvecPourcentage = [
   { nom: "palourde", pourcentage: 19, tailleMinimale: 3.5, tailleMaximale: 4 },
 ];
 
-let spacebarChallengeCompleted = true;
-let colors = [];
-
-// Sélectionnez le conteneur de détails de poisson
 const fishDetails = document.getElementById("fishDetails");
-fishDetails.classList.add("hidden");
-// Sélectionnez les éléments de détail du poisson
 const fishDetailImage = document.getElementById("fishDetailImage");
 const fishDetailName = document.getElementById("fishDetailName");
 const fishDetailCount = document.getElementById("fishDetailCount");
 const fishPercent = document.getElementById("fishPercent");
 const fishMaxSize = document.getElementById("fishMaxSize");
-// Sélectionnez la grille des poissons
 const fishGrid = document.querySelector(".fish-grid");
-
 const progressContainer = document.querySelector(".progress-container");
 const progressBar = document.querySelector(".progress-bar");
+const messageElement = document.querySelector(".messageElement");
+const verticalBar = document.querySelector(".vertical-bar");
+const counterElement = document.getElementById("counter");
+const imgRecord = document.querySelector(".imgRecord");
+const detailNewFish = document.querySelector(".detailNewFish");
+const txtNewFish = document.querySelector(".txtFish");
+const showListButton = document.getElementById("showListButton");
+const listContainer = document.getElementById("listContainer");
 
-let counter = 0;
 splashScreen();
 init();
 animate();
 
+//#########################################################region INIT##################################################
 function init() {
-  const poissonsPechesStr = localStorage.getItem("poissonsPeches");
+  fishDetails.classList.add("hidden");
   progressContainer.style.display = "none";
+
+  // Save
+  const poissonsPechesStr = localStorage.getItem("poissonsPeches");
   if (poissonsPechesStr) {
     poissonsPeches = JSON.parse(poissonsPechesStr);
     updateFishingList();
@@ -102,19 +112,17 @@ function init() {
   } else {
     setEmptyFishingList();
   }
-  //
 
+  // Init
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.5;
   document.body.appendChild(renderer.domElement);
-
-  //
-
   scene = new THREE.Scene();
 
+  // Camera
   camera = new THREE.PerspectiveCamera(
     55,
     window.innerWidth / window.innerHeight,
@@ -122,11 +130,12 @@ function init() {
     20000
   );
   camera.position.set(30, 30, 100);
-  //sounds
+
+  // Sounds
   const waterSound = document.getElementById("waterSound");
   const boatSound = document.getElementById("boatSound");
-  // Sun
 
+  // Sun
   sun = new THREE.Vector3();
 
   // Boat
@@ -147,7 +156,6 @@ function init() {
   );
 
   // Water
-
   const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
 
   water = new Water(waterGeometry, {
@@ -171,7 +179,6 @@ function init() {
   scene.add(water);
 
   // Skybox
-
   const sky = new Sky();
   sky.scale.setScalar(10000);
   scene.add(sky);
@@ -213,8 +220,7 @@ function init() {
 
   updateSun();
 
-  //
-
+  // Controls
   controls = new OrbitControls(camera, renderer.domElement);
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.target.set(0, 10, 0);
@@ -227,16 +233,11 @@ function init() {
   waterSound.loop = true;
   boatSound.loop = true;
 
-  // Ajoutez un gestionnaire d'événements pour la touche "ArrowUp" enfoncée
+  // Listeners
   document.addEventListener("keydown", (event) => {
     if (spacebarChallengeCompleted) {
-      // Vérifiez si le défi de la barre d'espace n'est pas encore terminé
       keyState[event.key] = true;
-
-      // Vérifiez si la touche Shift est enfoncée
       moveSpeed = event.shiftKey ? 1 : 0.5;
-
-      // Si "ArrowUp" est enfoncé et le son n'est pas déjà en cours de lecture, activez le son
       if (event.key === "ArrowUp" && !soundIsPlaying) {
         playBoatSound();
         playWaterSound();
@@ -247,13 +248,9 @@ function init() {
     }
   });
 
-  // Ajoutez un gestionnaire d'événements pour la touche "ArrowUp" relâchée
   document.addEventListener("keyup", (event) => {
     if (spacebarChallengeCompleted) {
-      // Vérifiez si le défi de la barre d'espace n'est pas encore terminé
       keyState[event.key] = false;
-
-      // Si la touche "ArrowUp" est relâchée et aucune autre touche "ArrowUp" n'est enfoncée, arrêtez le son
       if (
         (event.key === "ArrowUp" || event.key === "z") &&
         !Object.values(keyState).some((key) => key === true)
@@ -271,10 +268,20 @@ function init() {
     }
   });
 
+  showListButton.addEventListener("click", () => {
+    listContainer.classList.toggle("hidden");
+  });
+
+  showListButton.addEventListener("click", function () {
+    if (this.classList.contains("clicked")) {
+      this.classList.remove("clicked");
+    } else {
+      this.classList.add("clicked");
+    }
+  });
+
   function updatePosition() {
     if (spacebarChallengeCompleted) {
-      // Vérifiez si le défi de la barre d'espace n'est pas encore terminé
-
       if (keyState["z"] || keyState["ArrowUp"]) {
         boatSound.volume = 0.15;
         boat.position.z -= Math.sin(boatRotation) * moveSpeed;
@@ -294,7 +301,6 @@ function init() {
     }
 
     if (boat) {
-      // Mettre à jour la position de la caméra en fonction du bateau
       const cameraDistance = 80;
       camera.position.x = boat.position.x + cameraDistance;
       camera.position.y = boat.position.y + cameraDistance;
@@ -304,48 +310,14 @@ function init() {
     requestAnimationFrame(updatePosition.bind(this));
   }
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Couleur et intensité
+  // Lights
+  const ambientLight = new THREE.AmbientLight(0xffffff, 3);
   scene.add(ambientLight);
 
-  // Fonction pour créer une sphère noire
-  function createBlackSphere() {
-    if (boat) {
-      const geometry = new THREE.SphereGeometry(5, 32, 32);
-      const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-      const sphere = new THREE.Mesh(geometry, material);
-
-      // Positionnez la sphère à une position aléatoire autour du bateau
-      const radius = Math.random() * 50 + 50; // Rayon de génération
-      const angle = Math.random() * Math.PI * 2;
-      const x = boat.position.x + Math.cos(angle) * radius;
-      const z = boat.position.z + Math.sin(angle) * radius;
-      sphere.scale.set(0.6, 0.1, 0.2);
-      sphere.position.set(x, 0, z);
-      sphere.rotateY(Math.random() * 180);
-      sphere.material.transparent = true;
-      sphere.material.opacity = 1;
-
-      scene.add(sphere);
-      spheres.push(sphere);
-      if (spheres.length > 10) {
-        scene.remove(spheres[0]);
-        console.log("shift");
-        spheres.shift();
-      }
-    }
-  }
-
-  // Appelez la fonction pour créer une sphère toutes les 60 secondes (60000 ms)
   setInterval(createBlackSphere, 10000);
   updatePosition();
 
   window.addEventListener("resize", onWindowResize);
-}
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 function animate() {
@@ -362,38 +334,37 @@ function render() {
 
   renderer.render(scene, camera);
 }
+//#########################################################endregion#########################################################
 
-//PLay sounds
-function playWaterSound() {
-  waterSound.volume = 0.2;
-  waterSound.playbackRate = 1;
+//#########################################################region Spheres####################################################
+function createBlackSphere() {
+  if (boat) {
+    const geometry = new THREE.SphereGeometry(5, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const sphere = new THREE.Mesh(geometry, material);
 
-  waterSound.play().catch((error) => {
-    console.error("Erreur de lecture du son : ", error);
-  });
+    const radius = Math.random() * 50 + 50;
+    const angle = Math.random() * Math.PI * 2;
+    const x = boat.position.x + Math.cos(angle) * radius;
+    const z = boat.position.z + Math.sin(angle) * radius;
+    sphere.scale.set(0.6, 0.1, 0.2);
+    sphere.position.set(x, 0, z);
+    sphere.rotateY(Math.random() * 180);
+    sphere.material.transparent = true;
+    sphere.material.opacity = 1;
+
+    scene.add(sphere);
+    spheres.push(sphere);
+    if (spheres.length > 10) {
+      scene.remove(spheres[0]);
+      console.log("shift");
+      spheres.shift();
+    }
+  }
 }
 
-function playBoatSound() {
-  boatSound.volume = 0.1;
-  boatSound.playbackRate = 1.1;
-
-  boatSound.play().catch((error) => {
-    console.error("Erreur de lecture du son : ", error);
-  });
-}
-function stopWaterSound() {
-  waterSound.pause();
-  waterSound.currentTime = 0;
-}
-
-function stopBoatSound() {
-  boatSound.pause();
-  boatSound.currentTime = 0;
-}
-
-// Fonction pour mettre à jour les sphères existantes (par exemple, les supprimer si elles sont trop éloignées)
 function updateSpheres() {
-  const maxDistance = 1000; // Distance maximale avant de supprimer une sphère
+  const maxDistance = 1000;
 
   for (let i = spheres.length - 1; i >= 0; i--) {
     const sphere = spheres[i];
@@ -405,8 +376,6 @@ function updateSpheres() {
   }
 }
 
-const messageElement = document.querySelector(".messageElement");
-
 function detectCollision() {
   if (boat) {
     const collisionDistance = 10;
@@ -416,27 +385,22 @@ function detectCollision() {
       const distance = boat.position.distanceTo(sphere.position);
 
       if (distance < collisionDistance && !sphere.caught && moveSpeed < 0.9) {
-        // Retirez la sphère de la scène et du tableau
         spliceAndDeleteSphere(i, "Start mini Game");
 
-        // Affichez le message
         messageElement.style.display = "flex";
         const image = document.getElementById("randomImage");
         image.src = "./images/spaceBarSpam.png";
 
         if (spacebarChallengeCompleted) {
-          spacebarClickCount = 0;
           spacebarChallengeCompleted = false;
         }
 
-        // Masquez le message après 3 secondes
         setTimeout(() => {
           messageElement.style.display = "none";
           messageElement.style.pointerEvents = "none";
           startSpacebarChallenge();
         }, 3000);
 
-        // Sortez de la boucle, car une seule collision est gérée à la fois
         break;
       } else if (
         distance < collisionDistance * 2 &&
@@ -444,7 +408,7 @@ function detectCollision() {
         moveSpeed > 0.9
       ) {
         fishEscape(sphere, i);
-        sphere.caught = true; // Marque le poisson comme attrapé
+        sphere.caught = true;
         break;
       }
     }
@@ -460,9 +424,9 @@ function fishEscape(sphere, pos) {
     const nombreIterations = tempsTotal / diminutionInterval;
     const opaciteDelta = opaciteDiminution / nombreIterations;
 
-    const deplacementDistance = 0.5; // Distance à déplacer pendant la diminution
+    const deplacementDistance = 0.5;
 
-    const direction = new THREE.Vector3(0, 0, 1); // Direction initiale vers l'avant
+    const direction = new THREE.Vector3(0, 0, 1);
 
     const intervalID = setInterval(function () {
       sphere.material.opacity -= opaciteDelta;
@@ -471,13 +435,11 @@ function fishEscape(sphere, pos) {
         clearInterval(intervalID);
         spliceAndDeleteSphere(pos, "opacity");
       } else {
-        // Déplacer la sphère vers l'avant
         const deplacement = direction
           .clone()
           .multiplyScalar(deplacementDistance);
         sphere.position.add(deplacement);
 
-        // Aligner la rotation avec la direction du déplacement
         const angle = Math.atan2(direction.z, direction.x);
         sphere.rotation.y = angle;
       }
@@ -488,32 +450,28 @@ function fishEscape(sphere, pos) {
 function spliceAndDeleteSphere(pos, text) {
   console.log(text);
   if (pos >= 0 && pos < spheres.length) {
-    const removedSphere = spheres.splice(pos, 1)[0]; // Utilise [0] pour récupérer l'élément supprimé
+    const removedSphere = spheres.splice(pos, 1)[0];
     if (removedSphere) {
       scene.remove(removedSphere);
     }
   }
 }
+//#########################################################endregion#########################################################
 
-let isClicked = false;
-let spacebarGameRunning = false;
-let timeout;
+//#########################################################region Mini-Game##################################################
 function startSpacebarChallenge() {
   progressContainer.style.display = "block";
 
-  // Initialiser le temps restant
   let timeRemaining = 10;
 
-  // Afficher le temps restant au départ
   updateRemainingTime(timeRemaining);
 
   if (!spacebarGameRunning) {
-    // Ajouter un nouvel écouteur d'événements pour la barre d'espace uniquement si le jeu n'est pas déjà en cours
     document.addEventListener("keydown", handleSpacebarClick);
     spacebarGameRunning = true;
   }
 
-  // Mettre à jour le temps restant toutes les secondes
+  //Update Time Remaining
   const timer = setInterval(() => {
     timeRemaining--;
     if (timeRemaining >= 0) {
@@ -527,9 +485,8 @@ function startSpacebarChallenge() {
 
   startVerticalBarAnimation();
 
-  // Arrêtez le défi après 10 secondes
+  // Stop after 10 sec
   timeout = setTimeout(() => {
-    // Arrêter le compteur
     clearInterval(timer);
     if (!spacebarChallengeCompleted) {
       console.log("Jfejvijefbviujbfreuigsduif");
@@ -539,11 +496,9 @@ function startSpacebarChallenge() {
       spacebarClickCount = 0;
       const image = document.getElementById("randomImage");
       image.src = "./images/failed.png";
-      // Supprimer l'écouteur d'événements de la barre d'espace à la fin du jeu
       document.removeEventListener("keydown", handleSpacebarClick);
       spacebarGameRunning = false;
 
-      // Cacher l'élément message après 3 secondes
       setTimeout(() => {
         messageElement.style.display = "none";
         spacebarChallengeCompleted = true;
@@ -552,7 +507,6 @@ function startSpacebarChallenge() {
   }, 10000);
 }
 
-const verticalBar = document.querySelector(".vertical-bar");
 function startVerticalBarAnimation() {
   const horizontalBarContainer = document.querySelector(
     ".horizontal-bar-container"
@@ -575,13 +529,11 @@ function startVerticalBarAnimation() {
     position += direction * speed;
   }, 10);
 
-  // Arrêtez l'animation après un certain temps (par exemple, 10 secondes)
   setTimeout(() => {
     clearInterval(animationInterval);
-  }, 10000); // 10 secondes
+  }, 10000);
 }
 
-// Fonction pour déterminer la couleur en fonction de la position de la barre verticale
 function getColorForPosition(position, containerWidth, colors) {
   let currentPosition = 0;
 
@@ -597,12 +549,9 @@ function getColorForPosition(position, containerWidth, colors) {
     currentPosition += segmentWidth;
   }
 
-  return null; // Si la position n'est pas dans un segment
+  return null;
 }
 
-// Variable pour stocker le compteur
-const counterElement = document.getElementById("counter");
-// Fonction pour mettre à jour le compteur en fonction de la couleur
 function updateCounter(color) {
   if (color === "green") {
     counter++;
@@ -632,22 +581,18 @@ document.addEventListener("keyup", function (event) {
   }
 });
 
-// Fonction pour gérer l'événement de la barre d'espace
 function handleSpacebarClick(event) {
   if (event.key === " " && !isClicked) {
-    // Obtenez la position actuelle de la barre verticale
     const position = verticalBar.offsetLeft;
     isClicked = true;
-    // Obtenez la largeur du conteneur horizontal
+
     const horizontalBarContainer = document.querySelector(
       ".horizontal-bar-container"
     );
     const containerWidth = horizontalBarContainer.offsetWidth;
 
-    // Appelez la fonction pour déterminer la couleur
     const color = getColorForPosition(position, containerWidth, colors);
 
-    // Mettez à jour le compteur en fonction de la couleur
     updateCounter(color);
 
     if (counter == 3) {
@@ -661,10 +606,6 @@ function updateRemainingTime(timeRemaining) {
   document.getElementById("timeRemaining").textContent = `${timeRemaining}s`;
 }
 
-const imgRecord = document.querySelector(".imgRecord");
-const detailNewFish = document.querySelector(".detailNewFish");
-const txtNewFish = document.querySelector(".txtFish");
-
 function showCongratulationsMessage() {
   spacebarChallengeCompleted = true;
   clearTimeout(timeout);
@@ -676,18 +617,15 @@ function showCongratulationsMessage() {
     fishData.tailleMaximale
   );
 
-  // Mettre à jour l'attribut src de l'image
   const randomImage = document.getElementById("randomImage");
   randomImage.src = "./images/" + randomFish + ".png";
   messageElement.style.display = "flex";
   progressContainer.style.display = "none";
   detailNewFish.style.display = "flex";
 
-  // Vérifier si le poisson a déjà été pêché
   if (poissonsPeches[randomFish]) {
-    // Si le poisson a déjà été pêché, augmentez le compteur de pêche
+    // Already caught
     poissonsPeches[randomFish].peches++;
-    // Comparez les tailles et gardez la plus grande
     if (poissonsPeches[randomFish].taille < randomSize) {
       imgRecord.style.display = "block";
     }
@@ -697,7 +635,7 @@ function showCongratulationsMessage() {
       randomSize
     );
   } else {
-    // Si c'est la première pêche, ajoutez le poisson avec sa taille
+    // First time
     poissonsPeches[randomFish] = { taille: randomSize, peches: 1 };
     imgRecord.style.display = "block";
   }
@@ -721,202 +659,92 @@ function showCongratulationsMessage() {
   }, 3000);
 }
 
-function generateRandomSize(min, max) {
-  return (Math.random() * (max - min) + min).toFixed(2);
+function setSegmentSize() {
+  // Obtenir le pourcentage du poisson sélectionné au hasard
+  const selectedFish = poissonsDeMerAvecPourcentage.find(
+    (fish) => fish.nom === randomFish
+  );
+  const selectedFishPercentage = selectedFish ? selectedFish.pourcentage : 0;
+
+  const middleSegment = document.querySelector(".segment-3");
+  const adjacentSegment1 = document.querySelector(".segment-2");
+  const adjacentSegment2 = document.querySelector(".segment-4");
+  const newWidth = selectedFishPercentage * 2.5;
+
+  middleSegment.style.width = newWidth + "%";
+  const adjacentWidth = (100 - newWidth - 20) / 2;
+
+  middleSegment.style.width = newWidth + "%";
+  adjacentSegment1.style.width = adjacentWidth + "%";
+  adjacentSegment2.style.width = adjacentWidth + "%";
+  colors = [
+    { color: "red", pourcentage: 10 },
+    { color: "orange", pourcentage: adjacentWidth },
+    { color: "green", pourcentage: newWidth },
+    { color: "orange", pourcentage: adjacentWidth },
+    { color: "red", pourcentage: 10 },
+  ];
+}
+//#########################################################endregion#########################################################
+
+//#########################################################region Confetti###################################################
+function createConfetti() {
+  const confetti = document.createElement("div");
+  confetti.className = "confetti";
+
+  // Random Color
+  confetti.style.backgroundColor = `rgb(${Math.random() * 255}, ${
+    Math.random() * 255
+  }, ${Math.random() * 255})`;
+
+  // Random Position
+  confetti.style.top = "-50px";
+  confetti.style.left = `${getRandomInRange(0, window.innerWidth)}px`;
+
+  // Définir la vitesse de rotation aléatoire
+  const rotationSpeed = getRandomInRange(-0.2, 0.2);
+  confetti.setAttribute("data-rotation-speed", rotationSpeed);
+
+  document.body.appendChild(confetti);
+
+  animateConfetti(confetti);
 }
 
-function chaineAleatoireAvecPourcentage(chainesAvecPourcentage) {
-  const totalPourcentage = chainesAvecPourcentage.reduce(
-    (acc, chaine) => acc + chaine.pourcentage,
-    0
-  );
-  let random = Math.random() * totalPourcentage;
+function animateConfetti(confetti) {
+  const fallSpeed = getRandomInRange(3, 6);
+  let rotation = getRandomInRange(0, 1);
 
-  for (const chaine of chainesAvecPourcentage) {
-    if (random < chaine.pourcentage) {
-      return chaine.nom;
+  function fall() {
+    const confettiTop = parseFloat(confetti.style.top);
+    const newTop = confettiTop + fallSpeed;
+
+    if (newTop < window.innerHeight) {
+      confetti.style.top = `${newTop}px`;
+
+      const rotationSpeed = getRandomInRange(0.009, 0.015);
+
+      rotation += rotationSpeed;
+      confetti.style.transform = `rotate(${rotation}turn)`;
+
+      requestAnimationFrame(fall);
+    } else {
+      document.body.removeChild(confetti);
     }
-    random -= chaine.pourcentage;
   }
+
+  fall();
 }
 
-// Sélectionnez le bouton et la liste
-const showListButton = document.getElementById("showListButton");
-const listContainer = document.getElementById("listContainer");
+function launchConfetti() {
+  const confettiCount = 150;
 
-// Ajoutez un gestionnaire d'événements pour le bouton
-showListButton.addEventListener("click", () => {
-  // Basculez la classe "hidden" sur la liste pour l'afficher ou la masquer
-  listContainer.classList.toggle("hidden");
-});
-
-function setEmptyFishingList() {
-  for (let i = 0; i < poissonsDeMerAvecPourcentage.length; i++) {
-    const fishItem = document.createElement("div");
-    fishItem.classList.add("fish-item");
-
-    const image = document.createElement("img");
-    image.classList.add("fish-image");
-    image.src = `./images/unknown.png`;
-    image.alt = "???";
-
-    const text = document.createElement("p");
-    text.classList.add("fish-name");
-    text.textContent = "???";
-
-    fishItem.appendChild(image);
-    fishItem.appendChild(text);
-    fishGrid.appendChild(fishItem);
+  for (let i = 0; i < confettiCount; i++) {
+    createConfetti();
   }
 }
+//#########################################################endregion#########################################################
 
-function updateFishingList() {
-  // Effacez la grille actuelle
-  fishGrid.innerHTML = "";
-
-  for (const poisson in poissonsPeches) {
-    const fishItem = document.createElement("div");
-    fishItem.classList.add("fish-item");
-
-    const image = document.createElement("img");
-    image.classList.add("fish-image");
-    image.src = `./images/${poisson}.png`;
-    image.alt = poisson;
-
-    const text = document.createElement("p");
-    text.classList.add("fish-name");
-    text.textContent = `${poisson}`;
-
-    fishItem.appendChild(image);
-    fishItem.appendChild(text);
-    fishGrid.appendChild(fishItem);
-  }
-
-  // Ajoutez des éléments pour les poissons manquants
-  for (
-    let i = 0;
-    i <
-    poissonsDeMerAvecPourcentage.length - Object.keys(poissonsPeches).length;
-    i++
-  ) {
-    const fishItem = document.createElement("div");
-    fishItem.classList.add("fish-item");
-
-    const image = document.createElement("img");
-    image.classList.add("fish-image");
-    image.src = `./images/unknown.png`;
-    image.alt = "???";
-
-    const text = document.createElement("p");
-    text.classList.add("fish-name");
-    text.textContent = "???";
-
-    fishItem.appendChild(image);
-    fishItem.appendChild(text);
-    fishGrid.appendChild(fishItem);
-  }
-
-  // Sélectionnez tous les éléments .fish-item
-  const fishItems = document.querySelectorAll(".fish-item");
-
-  // Parcourez tous les éléments .fish-item et ajoutez un gestionnaire d'événements pour chaque élément
-  fishItems.forEach((fishItem) => {
-    fishItem.addEventListener("mouseover", () => {
-      let fishFound;
-      for (const poisson in poissonsPeches) {
-        if (fishItem.textContent == poisson) {
-          fishFound = poisson;
-        }
-      }
-
-      if (fishFound) {
-        const fishCount = poissonsPeches[fishFound].peches || 0; // Nombre de fois pêché
-        const fishImageSrc = `./images/${fishFound}.png`;
-        const fishName = fishFound;
-        const fishSize = poissonsPeches[fishFound].taille;
-
-        // Recherche du pourcentage dans poissonsDeMerAvecPourcentage
-        let fishPourcentage = 0;
-        for (const fish of poissonsDeMerAvecPourcentage) {
-          if (fish.nom === fishName) {
-            fishPourcentage = fish.pourcentage;
-            break; // Sortez de la boucle une fois que vous avez trouvé le poisson
-          }
-        }
-
-        // Mettez à jour les éléments de détail du poisson
-        fishDetailName.textContent = fishName.toLocaleUpperCase();
-        if (fishCount > 1) {
-          fishDetailCount.textContent =
-            upcaseFirstLetter(plural(fishName)) + " pêché(e)s : " + fishCount;
-        } else {
-          fishDetailCount.textContent =
-            upcaseFirstLetter(fishName) + " pêché(e) : " + fishCount;
-        }
-
-        fishDetailImage.src = fishImageSrc;
-        fishPercent.textContent =
-          "Chance de pêcher un(e) " + fishName + " : " + fishPourcentage + "%";
-        fishMaxSize.textContent = "Taille max. obtenue : " + fishSize + " cm";
-      } else {
-        // Récupérez les informations du poisson depuis les éléments de données
-        const fishName = "???";
-        // const fishCount =
-        const fishImageSrc = `./images/unknown.png`;
-
-        // Mettez à jour les éléments de détail du poisson
-        fishDetailName.textContent = fishName;
-        fishDetailCount.textContent = "???";
-        fishDetailImage.src = fishImageSrc;
-        fishPercent.textContent = "???";
-        fishMaxSize.textContent = "???";
-      }
-
-      // Affichez le conteneur de détails
-      fishDetails.classList.remove("hidden");
-    });
-
-    fishItem.addEventListener("mouseout", () => {
-      // Masquez le conteneur de détails lorsque la souris quitte l'élément .fish-item
-      fishDetails.classList.add("hidden");
-    });
-  });
-}
-
-function updateProgression() {
-  // Mettre à jour la barre de progression pour le nombre de types de poissons pêchés
-  const fishProgressContainer = document.querySelector(
-    ".fish-progress-container"
-  );
-  const fishProgressBar = document.querySelector(".fish-progress-bar");
-  const fishProgressPercent = document.querySelector(".text");
-
-  // Calculer le nombre de types différents de poissons pêchés
-  const numberOfFishTypes = Object.keys(poissonsPeches).length;
-  // Mettre à jour la largeur de la barre de progression en fonction du nombre de types
-  const percentage =
-    (numberOfFishTypes / poissonsDeMerAvecPourcentage.length) * 100; // MAX_FISH_TYPES est le nombre total de types de poissons
-  fishProgressBar.style.width = percentage + "%";
-
-  // Mettre à jour le texte à l'intérieur de la barre de progression
-  fishProgressPercent.textContent = percentage.toFixed(0) + "%";
-  if (percentage === 100) {
-    launchConfetti();
-  }
-}
-
-// Ajoutez un gestionnaire d'événements pour le bouton
-showListButton.addEventListener("click", function () {
-  // Vérifiez si le bouton a déjà la classe "clicked"
-  if (this.classList.contains("clicked")) {
-    // Si oui, enlevez la classe "clicked"
-    this.classList.remove("clicked");
-  } else {
-    // Sinon, ajoutez la classe "clicked" pour changer le style
-    this.classList.add("clicked");
-  }
-});
-
+//#########################################################region SplashScreen###############################################
 function splashScreen() {
   document.addEventListener("DOMContentLoaded", () => {
     const loadingBar = document.querySelector(".loading-bar"); // Mettez à jour la classe ici
@@ -949,6 +777,208 @@ function splashScreen() {
     const loadingInterval = setInterval(updateLoadingProgressBar, interval);
   });
 }
+//#########################################################endregion#########################################################
+
+//#########################################################region Sound######################################################
+function playWaterSound() {
+  waterSound.volume = 0.2;
+  waterSound.playbackRate = 1;
+
+  waterSound.play().catch((error) => {
+    console.error("Erreur de lecture du son : ", error);
+  });
+}
+
+function playBoatSound() {
+  boatSound.volume = 0.1;
+  boatSound.playbackRate = 1.1;
+
+  boatSound.play().catch((error) => {
+    console.error("Erreur de lecture du son : ", error);
+  });
+}
+function stopWaterSound() {
+  waterSound.pause();
+  waterSound.currentTime = 0;
+}
+
+function stopBoatSound() {
+  boatSound.pause();
+  boatSound.currentTime = 0;
+}
+//#########################################################endregion#########################################################
+
+//#########################################################region Html_Modifiers#############################################
+function setEmptyFishingList() {
+  for (let i = 0; i < poissonsDeMerAvecPourcentage.length; i++) {
+    const fishItem = document.createElement("div");
+    fishItem.classList.add("fish-item");
+
+    const image = document.createElement("img");
+    image.classList.add("fish-image");
+    image.src = `./images/unknown.png`;
+    image.alt = "???";
+
+    const text = document.createElement("p");
+    text.classList.add("fish-name");
+    text.textContent = "???";
+
+    fishItem.appendChild(image);
+    fishItem.appendChild(text);
+    fishGrid.appendChild(fishItem);
+  }
+}
+
+function updateFishingList() {
+  // Erase current grid
+  fishGrid.innerHTML = "";
+
+  for (const poisson in poissonsPeches) {
+    const fishItem = document.createElement("div");
+    fishItem.classList.add("fish-item");
+
+    const image = document.createElement("img");
+    image.classList.add("fish-image");
+    image.src = `./images/${poisson}.png`;
+    image.alt = poisson;
+
+    const text = document.createElement("p");
+    text.classList.add("fish-name");
+    text.textContent = `${poisson}`;
+
+    fishItem.appendChild(image);
+    fishItem.appendChild(text);
+    fishGrid.appendChild(fishItem);
+  }
+
+  for (
+    let i = 0;
+    i <
+    poissonsDeMerAvecPourcentage.length - Object.keys(poissonsPeches).length;
+    i++
+  ) {
+    const fishItem = document.createElement("div");
+    fishItem.classList.add("fish-item");
+
+    const image = document.createElement("img");
+    image.classList.add("fish-image");
+    image.src = `./images/unknown.png`;
+    image.alt = "???";
+
+    const text = document.createElement("p");
+    text.classList.add("fish-name");
+    text.textContent = "???";
+
+    fishItem.appendChild(image);
+    fishItem.appendChild(text);
+    fishGrid.appendChild(fishItem);
+  }
+
+  const fishItems = document.querySelectorAll(".fish-item");
+
+  fishItems.forEach((fishItem) => {
+    fishItem.addEventListener("mouseover", () => {
+      let fishFound;
+      for (const poisson in poissonsPeches) {
+        if (fishItem.textContent == poisson) {
+          fishFound = poisson;
+        }
+      }
+
+      if (fishFound) {
+        const fishCount = poissonsPeches[fishFound].peches || 0;
+        const fishImageSrc = `./images/${fishFound}.png`;
+        const fishName = fishFound;
+        const fishSize = poissonsPeches[fishFound].taille;
+
+        // Search current fish
+        let fishPourcentage = 0;
+        for (const fish of poissonsDeMerAvecPourcentage) {
+          if (fish.nom === fishName) {
+            fishPourcentage = fish.pourcentage;
+            break;
+          }
+        }
+
+        fishDetailName.textContent = fishName.toLocaleUpperCase();
+        if (fishCount > 1) {
+          fishDetailCount.textContent =
+            upcaseFirstLetter(plural(fishName)) + " pêché(e)s : " + fishCount;
+        } else {
+          fishDetailCount.textContent =
+            upcaseFirstLetter(fishName) + " pêché(e) : " + fishCount;
+        }
+
+        fishDetailImage.src = fishImageSrc;
+        fishPercent.textContent =
+          "Chance de pêcher un(e) " + fishName + " : " + fishPourcentage + "%";
+        fishMaxSize.textContent = "Taille max. obtenue : " + fishSize + " cm";
+      } else {
+        const fishName = "???";
+        const fishImageSrc = `./images/unknown.png`;
+
+        fishDetailName.textContent = fishName;
+        fishDetailCount.textContent = "???";
+        fishDetailImage.src = fishImageSrc;
+        fishPercent.textContent = "???";
+        fishMaxSize.textContent = "???";
+      }
+
+      fishDetails.classList.remove("hidden");
+    });
+
+    fishItem.addEventListener("mouseout", () => {
+      fishDetails.classList.add("hidden");
+    });
+  });
+}
+
+function updateProgression() {
+  const fishProgressContainer = document.querySelector(
+    ".fish-progress-container"
+  );
+  const fishProgressBar = document.querySelector(".fish-progress-bar");
+  const fishProgressPercent = document.querySelector(".text");
+
+  const numberOfFishTypes = Object.keys(poissonsPeches).length;
+  const percentage =
+    (numberOfFishTypes / poissonsDeMerAvecPourcentage.length) * 100;
+  fishProgressBar.style.width = percentage + "%";
+
+  fishProgressPercent.textContent = percentage.toFixed(0) + "%";
+  if (percentage === 100) {
+    launchConfetti();
+  }
+}
+
+//#########################################################endregion#########################################################
+
+//#########################################################region Utils######################################################
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function generateRandomSize(min, max) {
+  return (Math.random() * (max - min) + min).toFixed(2);
+}
+
+function chaineAleatoireAvecPourcentage(chainesAvecPourcentage) {
+  const totalPourcentage = chainesAvecPourcentage.reduce(
+    (acc, chaine) => acc + chaine.pourcentage,
+    0
+  );
+  let random = Math.random() * totalPourcentage;
+
+  for (const chaine of chainesAvecPourcentage) {
+    if (random < chaine.pourcentage) {
+      return chaine.nom;
+    }
+    random -= chaine.pourcentage;
+  }
+}
 
 function plural(singular) {
   if (singular.substring(singular.length - 3) == "eau") {
@@ -957,7 +987,6 @@ function plural(singular) {
     const words = singular.split(" ");
     const pluralWords = words.map((word) => word + "s");
 
-    // Rejoindre les mots avec un espace pour former la nouvelle chaîne
     const newString = pluralWords.join(" ");
 
     return newString;
@@ -977,121 +1006,17 @@ function setSpeed(nameFish) {
   const minSpeed = 5;
   const maxSpeed = 10;
   if (fish) {
-    // Calculez la vitesse en fonction du pourcentage du poisson
     const percentage = fish.pourcentage;
-    // Inversez la relation entre le pourcentage et la vitesse
     const invertedPercentage = 100 - percentage;
-    // Calculez la vitesse en fonction de l'inverse du pourcentage
     const speed = minSpeed + (invertedPercentage / 100) * (maxSpeed - minSpeed);
 
-    // Assurez-vous que la vitesse reste dans la plage spécifiée (minspeed à maxspeed)
     return Math.min(maxSpeed, Math.max(minSpeed, speed));
   } else {
-    // Retournez une valeur par défaut (par exemple, 0) si le poisson n'est pas trouvé
     return 0;
   }
-}
-
-function setSegmentSize() {
-  // Obtenir le pourcentage du poisson sélectionné au hasard
-  const selectedFish = poissonsDeMerAvecPourcentage.find(
-    (fish) => fish.nom === randomFish
-  );
-  const selectedFishPercentage = selectedFish ? selectedFish.pourcentage : 0;
-
-  // Mettre à jour la taille du segment du milieu en fonction du pourcentage du poisson
-  const middleSegmentWidth = 100 - selectedFishPercentage; // Inverser le pourcentage
-
-  // Mettez à jour la couleur du segment du milieu
-  const middleSegment = document.querySelector(".segment-3");
-  const adjacentSegment1 = document.querySelector(".segment-2");
-  const adjacentSegment2 = document.querySelector(".segment-4");
-  // middleSegment.style.backgroundColor = getColorForPosition(
-  //   middleSegmentWidth,
-  //   100
-  // );
-  const newWidth = selectedFishPercentage * 2.5; // Exemple de calcul, ajustez-le en fonction de vos besoins
-
-  // Mettez à jour le style du segment du milieu
-  middleSegment.style.width = newWidth + "%";
-  const adjacentWidth = (100 - newWidth - 20) / 2;
-
-  // Mettez à jour le style des segments
-  middleSegment.style.width = newWidth + "%";
-  adjacentSegment1.style.width = adjacentWidth + "%";
-  adjacentSegment2.style.width = adjacentWidth + "%";
-  colors = [
-    { color: "red", pourcentage: 10 },
-    { color: "orange", pourcentage: adjacentWidth },
-    { color: "green", pourcentage: newWidth },
-    { color: "orange", pourcentage: adjacentWidth },
-    { color: "red", pourcentage: 10 },
-  ];
 }
 
 function getRandomInRange(min, max) {
   return Math.random() * (max - min) + min;
 }
-
-// Fonction pour créer un confetti
-function createConfetti() {
-  const confetti = document.createElement("div");
-  confetti.className = "confetti";
-
-  // Définir la couleur aléatoire
-  confetti.style.backgroundColor = `rgb(${Math.random() * 255}, ${
-    Math.random() * 255
-  }, ${Math.random() * 255})`;
-
-  // Positionner le confetti en haut de l'écran à une position aléatoire
-  confetti.style.top = "-50px";
-  confetti.style.left = `${getRandomInRange(0, window.innerWidth)}px`;
-
-  // Définir la vitesse de rotation aléatoire
-  const rotationSpeed = getRandomInRange(-0.2, 0.2);
-  confetti.setAttribute("data-rotation-speed", rotationSpeed);
-
-  document.body.appendChild(confetti);
-
-  // Animer le confetti
-  animateConfetti(confetti);
-}
-
-// Fonction pour animer le confetti
-function animateConfetti(confetti) {
-  const fallSpeed = getRandomInRange(3, 6); // Vitesse de chute aléatoire
-  let rotation = getRandomInRange(0, 1); // Rotation totale du confetti
-
-  function fall() {
-    const confettiTop = parseFloat(confetti.style.top);
-    const newTop = confettiTop + fallSpeed;
-
-    // Vérifier si le confetti a atteint le bas de l'écran
-    if (newTop < window.innerHeight) {
-      confetti.style.top = `${newTop}px`;
-
-      // Récupérer la vitesse de rotation du confetti
-      const rotationSpeed = getRandomInRange(0.009, 0.015); // Ajustez cette plage selon vos besoins
-
-      // Appliquer la rotation
-      rotation += rotationSpeed;
-      confetti.style.transform = `rotate(${rotation}turn)`;
-
-      requestAnimationFrame(fall);
-    } else {
-      // Supprimer le confetti une fois qu'il a atteint le bas
-      document.body.removeChild(confetti);
-    }
-  }
-
-  fall();
-}
-
-// Fonction pour lancer une pluie de confettis
-function launchConfetti() {
-  const confettiCount = 150; // Nombre de confettis
-
-  for (let i = 0; i < confettiCount; i++) {
-    createConfetti();
-  }
-}
+//#########################################################endregion#########################################################
