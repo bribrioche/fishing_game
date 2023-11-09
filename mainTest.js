@@ -7,8 +7,12 @@ import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 
 let camera, scene, renderer;
 let controls, water, sun, boat;
+let moveSpeed = 0.5;
+let boatRotation = 0;
 // Créez un tableau pour stocker les sphères générées
 const spheres = [];
+let randomFish;
+let spacebarClickCount = 0;
 
 // Déclarez un objet pour stocker les poissons pêchés
 let poissonsPeches = {};
@@ -48,7 +52,12 @@ const poissonsDeMerAvecPourcentage = [
     tailleMinimale: 150,
     tailleMaximale: 300,
   },
-  { nom: "crevette", pourcentage: 14, tailleMinimale: 3, tailleMaximale: 5 },
+  {
+    nom: "crevette",
+    pourcentage: 14,
+    tailleMinimale: 3,
+    tcolorsailleMaximale: 5,
+  },
   { nom: "homard", pourcentage: 11, tailleMinimale: 25, tailleMaximale: 60 },
   {
     nom: "calamar",
@@ -61,6 +70,7 @@ const poissonsDeMerAvecPourcentage = [
 ];
 
 let spacebarChallengeCompleted = true;
+let colors = [];
 
 // Sélectionnez le conteneur de détails de poisson
 const fishDetails = document.getElementById("fishDetails");
@@ -74,6 +84,10 @@ const fishMaxSize = document.getElementById("fishMaxSize");
 // Sélectionnez la grille des poissons
 const fishGrid = document.querySelector(".fish-grid");
 
+const progressContainer = document.querySelector(".progress-container");
+const progressBar = document.querySelector(".progress-bar");
+
+let counter = 0;
 splashScreen();
 init();
 animate();
@@ -126,6 +140,7 @@ function init() {
       boat.scale.set(0.01, 0.01, 0.01);
       scene.add(boat);
     },
+    (xhr) => {},
     function (error) {
       console.error("Erreur de chargement du modèle FBX : ", error);
     }
@@ -207,8 +222,6 @@ function init() {
   controls.maxDistance = 200.0;
   controls.update();
 
-  const moveSpeed = 0.5;
-  let boatRotation = 0;
   let soundIsPlaying = false;
   const keyState = {};
   waterSound.loop = true;
@@ -219,6 +232,9 @@ function init() {
     if (spacebarChallengeCompleted) {
       // Vérifiez si le défi de la barre d'espace n'est pas encore terminé
       keyState[event.key] = true;
+
+      // Vérifiez si la touche Shift est enfoncée
+      moveSpeed = event.shiftKey ? 1 : 0.5;
 
       // Si "ArrowUp" est enfoncé et le son n'est pas déjà en cours de lecture, activez le son
       if (event.key === "ArrowUp" && !soundIsPlaying) {
@@ -246,6 +262,10 @@ function init() {
         stopWaterSound();
         soundIsPlaying = false;
       }
+
+      if (event.key === "Shift") {
+        moveSpeed = 0.5;
+      }
     } else {
       keyState[event.key] = false;
     }
@@ -254,9 +274,9 @@ function init() {
   function updatePosition() {
     if (spacebarChallengeCompleted) {
       // Vérifiez si le défi de la barre d'espace n'est pas encore terminé
+
       if (keyState["z"] || keyState["ArrowUp"]) {
         boatSound.volume = 0.15;
-
         boat.position.z -= Math.sin(boatRotation) * moveSpeed;
         boat.position.x += Math.cos(boatRotation) * moveSpeed;
       }
@@ -281,7 +301,7 @@ function init() {
       camera.position.z = boat.position.z + cameraDistance;
       camera.lookAt(boat.position);
     }
-    requestAnimationFrame(updatePosition);
+    requestAnimationFrame(updatePosition.bind(this));
   }
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Couleur et intensité
@@ -302,24 +322,25 @@ function init() {
       sphere.scale.set(0.6, 0.1, 0.2);
       sphere.position.set(x, 0, z);
       sphere.rotateY(Math.random() * 180);
+      sphere.material.transparent = true;
+      sphere.material.opacity = 1;
 
       scene.add(sphere);
       spheres.push(sphere);
-      if (spheres.length > 5) {
+      if (spheres.length > 20) {
         scene.remove(spheres[0]);
+        console.log("shift");
         spheres.shift();
       }
     }
   }
 
-  createBlackSphere();
   // Appelez la fonction pour créer une sphère toutes les 60 secondes (60000 ms)
-  setInterval(createBlackSphere, 10000);
+  setInterval(createBlackSphere, 1000);
   updatePosition();
 
   window.addEventListener("resize", onWindowResize);
 }
-
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -379,8 +400,7 @@ function updateSpheres() {
     const distance = boat.position.distanceTo(sphere.position);
 
     if (distance > maxDistance) {
-      scene.remove(sphere);
-      spheres.splice(i, 1);
+      spliceAndDeleteSphere(i, "to much spheres");
     }
   }
 }
@@ -389,17 +409,15 @@ const messageElement = document.querySelector(".messageElement");
 
 function detectCollision() {
   if (boat) {
-    const collisionDistance = 10; // Distance de collision, ajustez selon vos besoins
+    const collisionDistance = 10;
 
-    // Parcourez toutes les sphères noires
     for (let i = 0; i < spheres.length; i++) {
       const sphere = spheres[i];
       const distance = boat.position.distanceTo(sphere.position);
 
-      if (distance < collisionDistance) {
+      if (distance < collisionDistance && !sphere.caught && moveSpeed < 0.9) {
         // Retirez la sphère de la scène et du tableau
-        scene.remove(sphere);
-        spheres.splice(i, 1);
+        spliceAndDeleteSphere(i, "Start mini Game");
 
         // Affichez le message
         messageElement.style.display = "flex";
@@ -410,7 +428,6 @@ function detectCollision() {
           spacebarClickCount = 0;
           spacebarChallengeCompleted = false;
           progressBar.style.width = "0%";
-          // updateProgressBar(); // Réinitialise la barre de progression
         }
 
         // Masquez le message après 3 secondes
@@ -422,11 +439,64 @@ function detectCollision() {
 
         // Sortez de la boucle, car une seule collision est gérée à la fois
         break;
+      } else if (
+        distance < collisionDistance * 2 &&
+        !sphere.caught &&
+        moveSpeed > 0.9
+      ) {
+        fishEscape(sphere, i);
+        sphere.caught = true; // Marque le poisson comme attrapé
+        break;
       }
     }
   }
 }
 
+function fishEscape(sphere, pos) {
+  if (!sphere.caught) {
+    const opaciteDiminution = 0.2;
+    const diminutionInterval = 10;
+    const tempsTotal = 100;
+
+    const nombreIterations = tempsTotal / diminutionInterval;
+    const opaciteDelta = opaciteDiminution / nombreIterations;
+
+    const deplacementDistance = 0.5; // Distance à déplacer pendant la diminution
+
+    const direction = new THREE.Vector3(0, 0, 1); // Direction initiale vers l'avant
+
+    const intervalID = setInterval(function () {
+      sphere.material.opacity -= opaciteDelta;
+
+      if (sphere.material.opacity <= 0) {
+        clearInterval(intervalID);
+        spliceAndDeleteSphere(pos, "opacity");
+      } else {
+        // Déplacer la sphère vers l'avant
+        const deplacement = direction
+          .clone()
+          .multiplyScalar(deplacementDistance);
+        sphere.position.add(deplacement);
+
+        // Aligner la rotation avec la direction du déplacement
+        const angle = Math.atan2(direction.z, direction.x);
+        sphere.rotation.y = angle;
+      }
+    }, diminutionInterval);
+  }
+}
+
+function spliceAndDeleteSphere(pos, text) {
+  console.log(text);
+  if (pos >= 0 && pos < spheres.length) {
+    const removedSphere = spheres.splice(pos, 1)[0]; // Utilise [0] pour récupérer l'élément supprimé
+    if (removedSphere) {
+      scene.remove(removedSphere);
+    }
+  }
+}
+
+let isClicked = false;
 let spacebarGameRunning = false;
 let timeout;
 function startSpacebarChallenge() {
@@ -440,7 +510,7 @@ function startSpacebarChallenge() {
 
   if (!spacebarGameRunning) {
     // Ajouter un nouvel écouteur d'événements pour la barre d'espace uniquement si le jeu n'est pas déjà en cours
-    document.addEventListener("keyup", handleSpacebarClick);
+    document.addEventListener("keydown", handleSpacebarClick);
     spacebarGameRunning = true;
   }
 
@@ -483,7 +553,6 @@ function startSpacebarChallenge() {
   }, 10000);
 }
 
-let counter = 0;
 const verticalBar = document.querySelector(".vertical-bar");
 function startVerticalBarAnimation() {
   const horizontalBarContainer = document.querySelector(
@@ -519,12 +588,10 @@ function getColorForPosition(position, containerWidth, colors) {
 
   for (let i = 0; i < colors.length; i++) {
     const segmentWidth = (containerWidth * colors[i].pourcentage) / 100;
-
     if (
       position >= currentPosition &&
       position <= currentPosition + segmentWidth
     ) {
-      console.log(colors[i].color);
       return colors[i].color;
     }
 
@@ -547,12 +614,18 @@ function updateCounter(color) {
   counterElement.textContent = "Compteur : " + counter;
 }
 
+document.addEventListener("keyup", function (event) {
+  if (event.code === "Space" && isClicked) {
+    isClicked = false;
+  }
+});
+
 // Fonction pour gérer l'événement de la barre d'espace
 function handleSpacebarClick(event) {
-  if (event.key === " ") {
+  if (event.key === " " && !isClicked) {
     // Obtenez la position actuelle de la barre verticale
     const position = verticalBar.offsetLeft;
-
+    isClicked = true;
     // Obtenez la largeur du conteneur horizontal
     const horizontalBarContainer = document.querySelector(
       ".horizontal-bar-container"
@@ -572,11 +645,6 @@ function handleSpacebarClick(event) {
   }
 }
 
-const progressContainer = document.querySelector(".progress-container");
-const progressBar = document.querySelector(".progress-bar");
-
-let spacebarClickCount = 0;
-
 function updateRemainingTime(timeRemaining) {
   document.getElementById("timeRemaining").textContent = `${timeRemaining}s`;
 }
@@ -584,7 +652,7 @@ function updateRemainingTime(timeRemaining) {
 const imgRecord = document.querySelector(".imgRecord");
 const detailNewFish = document.querySelector(".detailNewFish");
 const txtNewFish = document.querySelector(".txtFish");
-let randomFish;
+
 function showCongratulationsMessage() {
   spacebarChallengeCompleted = true;
   clearTimeout(timeout);
@@ -908,8 +976,6 @@ function setSpeed(nameFish) {
   }
 }
 
-let colors = [];
-
 function setSegmentSize() {
   // Obtenir le pourcentage du poisson sélectionné au hasard
   const selectedFish = poissonsDeMerAvecPourcentage.find(
@@ -945,5 +1011,4 @@ function setSegmentSize() {
     { color: "orange", pourcentage: adjacentWidth },
     { color: "red", pourcentage: 10 },
   ];
-  console.log(colors);
 }
