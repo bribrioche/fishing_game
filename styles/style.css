@@ -1,6 +1,7 @@
 body {
   font-family: "Roboto", sans-serif;
   margin: 0;
+  overflow: hidden;
 }
 
 .divImg {
@@ -56,12 +57,17 @@ body {
   transform: translate(-50%, -50%);
   display: none;
   width: 500px;
-  height: 100px;
-  background-color: #ffffffcc;
-  border: 1px solid #0842578d;
+  min-height: 125px;
+  max-height: 150px;
+  padding: 10px;
+  background-color: #141414;
+  border: 1px solid #666666;
   border-radius: 5px;
   overflow: hidden;
-  padding-top: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .progress-bar {
@@ -76,6 +82,7 @@ body {
   left: 0;
   width: 100%;
   text-align: center;
+  color: #fff;
 }
 
 .imageSpam {
@@ -286,7 +293,7 @@ p {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  height: 10px;
+  height: 50px;
   background-color: #ccc; /* Couleur de fond de la barre */
 }
 
@@ -317,7 +324,7 @@ p {
 .game-container {
   position: relative;
   width: 100%;
-  height: 300px; /* Ajustez la hauteur en fonction de vos besoins */
+  min-height: 40px; /* Ajustez la hauteur en fonction de vos besoins */
 }
 
 .horizontal-bar-container {
@@ -337,16 +344,26 @@ p {
 
 .vertical-bar {
   width: 3px; /* Largeur de la barre verticale */
-  height: 100%;
-  background-color: rgb(44, 2, 2); /* Couleur de la barre verticale */
-  border: #ccc 1px solid;
+  height: 40px;
+  background-color: rgb(19, 18, 18); /* Couleur de la barre verticale */
+  border: rgb(19, 18, 18) 1px solid;
+  border-radius: 10px;
   position: absolute;
   top: 0;
   left: 0; /* Ajustez la position initiale si nécessaire */
 }
 
-.progress-bar-segment {
-  height: 100%;
-  position: relative;
-  overflow: hidden; /* Cacher le contenu qui dépasse */
+#counter {
+  color: #fff;
+  font-size: xx-large;
+  margin-top: 10px;
+}
+
+.confetti {
+  position: absolute;
+  width: 15px;
+  height: 8px;
+  background-color: red; /* Couleur initiale, peut être modifiée */
+  /* border-radius: 50%; */
+  pointer-events: none;
 }

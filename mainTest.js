@@ -94,7 +94,7 @@ animate();
 
 function init() {
   const poissonsPechesStr = localStorage.getItem("poissonsPeches");
-
+  progressContainer.style.display = "none";
   if (poissonsPechesStr) {
     poissonsPeches = JSON.parse(poissonsPechesStr);
     updateFishingList();
@@ -427,7 +427,6 @@ function detectCollision() {
         if (spacebarChallengeCompleted) {
           spacebarClickCount = 0;
           spacebarChallengeCompleted = false;
-          progressBar.style.width = "0%";
         }
 
         // Masquez le message après 3 secondes
@@ -611,7 +610,20 @@ function updateCounter(color) {
     counter--;
   }
 
-  counterElement.textContent = "Compteur : " + counter;
+  switch (counter) {
+    case 1:
+      counterElement.textContent = "Moulinez !";
+      break;
+
+    case 2:
+      counterElement.textContent = "Relevez !";
+      break;
+
+    case 3:
+      counterElement.textContent = "Ferrez !";
+      counter == 0;
+      break;
+  }
 }
 
 document.addEventListener("keyup", function (event) {
@@ -921,6 +933,8 @@ function splashScreen() {
           splashScreen.style.opacity = 0;
           setTimeout(() => {
             splashScreen.style.display = "none";
+            // Appeler la fonction pour lancer la pluie de confettis
+            launchConfetti();
           }, 1000); // Attendre 1 seconde pour que le splash screen disparaisse complètement
         }, 1000); // Attendre 1 seconde après l'atteinte de 100 % pour laisser le temps à l'animation de disparaître
       } else {
@@ -1011,4 +1025,71 @@ function setSegmentSize() {
     { color: "orange", pourcentage: adjacentWidth },
     { color: "red", pourcentage: 10 },
   ];
+}
+
+function getRandomInRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+// Fonction pour créer un confetti
+function createConfetti() {
+  const confetti = document.createElement("div");
+  confetti.className = "confetti";
+
+  // Définir la couleur aléatoire
+  confetti.style.backgroundColor = `rgb(${Math.random() * 255}, ${
+    Math.random() * 255
+  }, ${Math.random() * 255})`;
+
+  // Positionner le confetti en haut de l'écran à une position aléatoire
+  confetti.style.top = "0";
+  confetti.style.left = `${getRandomInRange(0, window.innerWidth)}px`;
+
+  // Définir la vitesse de rotation aléatoire
+  const rotationSpeed = getRandomInRange(-0.2, 0.2);
+  confetti.setAttribute("data-rotation-speed", rotationSpeed);
+
+  document.body.appendChild(confetti);
+
+  // Animer le confetti
+  animateConfetti(confetti);
+}
+
+// Fonction pour animer le confetti
+function animateConfetti(confetti) {
+  const fallSpeed = getRandomInRange(3, 6); // Vitesse de chute aléatoire
+
+  function fall() {
+    const confettiTop = parseFloat(confetti.style.top);
+    const newTop = confettiTop + fallSpeed;
+
+    // Vérifier si le confetti a atteint le bas de l'écran
+    if (newTop < window.innerHeight) {
+      confetti.style.top = `${newTop}px`;
+
+      // Récupérer la vitesse de rotation du confetti
+      const rotationSpeed = parseFloat(
+        confetti.getAttribute("data-rotation-speed")
+      );
+
+      // Appliquer la rotation
+      confetti.style.transform = `rotate(${rotationSpeed}turn)`;
+
+      requestAnimationFrame(fall);
+    } else {
+      // Supprimer le confetti une fois qu'il a atteint le bas
+      document.body.removeChild(confetti);
+    }
+  }
+
+  fall();
+}
+
+// Fonction pour lancer une pluie de confettis
+function launchConfetti() {
+  const confettiCount = 200; // Nombre de confettis
+
+  for (let i = 0; i < confettiCount; i++) {
+    createConfetti();
+  }
 }
