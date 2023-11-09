@@ -95,6 +95,12 @@ div#listContainer {
   z-index: 2; /* Assurez-vous que le bouton et la liste sont au-dessus du canvas */
 }
 
+button#showAchievementsButton,
+div#listContainer {
+  position: absolute;
+  z-index: 2; /* Assurez-vous que le bouton et la liste sont au-dessus du canvas */
+}
+
 button#showListButton {
   top: 10px;
   left: 10px;
@@ -112,6 +118,26 @@ button#showListButton:hover {
 }
 
 button#showListButton.clicked {
+  border-width: 2px 2px 0px 2px;
+}
+
+button#showAchievementsButton {
+  top: 10px;
+  left: 90px;
+  padding: 10px;
+  background-color: #141414;
+  border-radius: 5px 05px 0px 0px;
+  border-width: 2px 2px 2px 2px;
+  border-color: #666666;
+  width: 70px;
+  height: 70px;
+}
+
+button#showAchievementsButton:hover {
+  cursor: pointer;
+}
+
+button#showAchievementsButton.clicked {
   border-width: 2px 2px 0px 2px;
 }
 
@@ -265,6 +291,7 @@ p {
   z-index: 1000;
   background-image: url("../images/splashScreen.png");
   background-size: cover;
+  display: none;
 }
 
 .loading-progress-container {

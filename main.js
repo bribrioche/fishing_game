@@ -94,7 +94,7 @@ const imgRecord = document.querySelector(".imgRecord");
 const detailNewFish = document.querySelector(".detailNewFish");
 const txtNewFish = document.querySelector(".txtFish");
 
-splashScreen();
+// splashScreen();
 init();
 animate();
 
@@ -582,7 +582,7 @@ document.addEventListener("keyup", function (event) {
 });
 
 function handleSpacebarClick(event) {
-  if (event.key === " " && !isClicked) {
+  if (event.key === " " && !isClicked && counter < 3) {
     const position = verticalBar.offsetLeft;
     isClicked = true;
 
@@ -597,6 +597,7 @@ function handleSpacebarClick(event) {
 
     if (counter == 3) {
       counter++;
+      console.log(counter);
       showCongratulationsMessage();
     }
   }
@@ -617,8 +618,19 @@ function showCongratulationsMessage() {
     fishData.tailleMaximale
   );
 
+  //TO DO SHINY
   const randomImage = document.getElementById("randomImage");
-  randomImage.src = "./images/" + randomFish + ".png";
+  let chanceforShiny = 50;
+  const chance = getRandomInRange(0, 100);
+
+  const image = document.createElement("img");
+  image.classList.add("fish-image");
+  if (chance < chanceforShiny) {
+    randomImage.src = "./images/shiny/" + randomFish + ".png";
+  } else {
+    randomImage.src = "./images/" + randomFish + ".png";
+  }
+
   messageElement.style.display = "flex";
   progressContainer.style.display = "none";
   detailNewFish.style.display = "flex";
