@@ -82,23 +82,23 @@ const fishDetailName = document.getElementById("fishDetailName");
 const fishDetailCount = document.getElementById("fishDetailCount");
 const fishPercent = document.getElementById("fishPercent");
 const fishMaxSize = document.getElementById("fishMaxSize");
+const showListButton = document.getElementById("showListButton");
+const listContainer = document.getElementById("listContainer");
+const counterElement = document.getElementById("counter");
 const fishGrid = document.querySelector(".fish-grid");
 const progressContainer = document.querySelector(".progress-container");
 const progressBar = document.querySelector(".progress-bar");
 const messageElement = document.querySelector(".messageElement");
 const verticalBar = document.querySelector(".vertical-bar");
-const counterElement = document.getElementById("counter");
 const imgRecord = document.querySelector(".imgRecord");
 const detailNewFish = document.querySelector(".detailNewFish");
 const txtNewFish = document.querySelector(".txtFish");
-const showListButton = document.getElementById("showListButton");
-const listContainer = document.getElementById("listContainer");
 
 splashScreen();
 init();
 animate();
 
-//#########################################################region INIT##################################################
+//#########################################################region Init##################################################
 function init() {
   fishDetails.classList.add("hidden");
   progressContainer.style.display = "none";
@@ -660,7 +660,6 @@ function showCongratulationsMessage() {
 }
 
 function setSegmentSize() {
-  // Obtenir le pourcentage du poisson sélectionné au hasard
   const selectedFish = poissonsDeMerAvecPourcentage.find(
     (fish) => fish.nom === randomFish
   );
