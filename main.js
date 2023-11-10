@@ -23,6 +23,10 @@ let spacebarGameRunning = false;
 let randomFish;
 let timeout;
 
+const fishingStats = {
+  escapedFish: 0,
+  distanceTraveled: 0,
+};
 const poissonsDeMerAvecPourcentage = [
   { nom: "saumon", pourcentage: 10, tailleMinimale: 45, tailleMaximale: 150 },
   { nom: "bar", pourcentage: 15, tailleMinimale: 40, tailleMaximale: 100 },
@@ -75,6 +79,10 @@ const poissonsDeMerAvecPourcentage = [
   { nom: "moule", pourcentage: 17, tailleMinimale: 4, tailleMaximale: 5 },
   { nom: "palourde", pourcentage: 19, tailleMinimale: 3.5, tailleMaximale: 4 },
 ];
+
+const chanceforShiny = 100;
+const distanceForAchievement = 10000;
+const escapedFishForAchievement = 50;
 
 const fishDetails = document.getElementById("fishDetails");
 const fishDetailImage = document.getElementById("fishDetailImage");
@@ -286,6 +294,11 @@ function init() {
         boatSound.volume = 0.15;
         boat.position.z -= Math.sin(boatRotation) * moveSpeed;
         boat.position.x += Math.cos(boatRotation) * moveSpeed;
+        fishingStats.distanceTraveled += moveSpeed;
+        localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
+        if (fishingStats.distanceTraveled >= distanceForAchievement) {
+          getAllAchievements();
+        }
       }
       if (keyState["q"] || keyState["ArrowLeft"]) {
         boatSound.volume = 0.2;
@@ -318,6 +331,7 @@ function init() {
   updatePosition();
 
   window.addEventListener("resize", onWindowResize);
+  getAllAchievements();
 }
 
 function animate() {
@@ -432,6 +446,11 @@ function fishEscape(sphere, pos) {
       sphere.material.opacity -= opaciteDelta;
 
       if (sphere.material.opacity <= 0) {
+        fishingStats.escapedFish++;
+        localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
+        if (fishingStats.escapedFish >= escapedFishForAchievement) {
+          getAllAchievements();
+        }
         clearInterval(intervalID);
         spliceAndDeleteSphere(pos, "opacity");
       } else {
@@ -489,7 +508,6 @@ function startSpacebarChallenge() {
   timeout = setTimeout(() => {
     clearInterval(timer);
     if (!spacebarChallengeCompleted) {
-      console.log("Jfejvijefbviujbfreuigsduif");
       messageElement.style.display = "flex";
       progressBar.style.width = "0%";
       progressContainer.style.display = "none";
@@ -618,14 +636,14 @@ function showCongratulationsMessage() {
     fishData.tailleMaximale
   );
 
-  //TO DO SHINY
   const randomImage = document.getElementById("randomImage");
-  let chanceforShiny = 50;
   const chance = getRandomInRange(0, 100);
+  const isShiny = chance < chanceforShiny;
 
   const image = document.createElement("img");
   image.classList.add("fish-image");
-  if (chance < chanceforShiny) {
+
+  if (isShiny) {
     randomImage.src = "./images/shiny/" + randomFish + ".png";
   } else {
     randomImage.src = "./images/" + randomFish + ".png";
@@ -638,6 +656,11 @@ function showCongratulationsMessage() {
   if (poissonsPeches[randomFish]) {
     // Already caught
     poissonsPeches[randomFish].peches++;
+
+    if (isShiny) {
+      poissonsPeches[randomFish].shiny = true;
+    }
+
     if (poissonsPeches[randomFish].taille < randomSize) {
       imgRecord.style.display = "block";
     }
@@ -649,6 +672,9 @@ function showCongratulationsMessage() {
   } else {
     // First time
     poissonsPeches[randomFish] = { taille: randomSize, peches: 1 };
+    if (isShiny) {
+      poissonsPeches[randomFish].shiny = true;
+    }
     imgRecord.style.display = "block";
   }
   txtNewFish.textContent =
@@ -959,6 +985,53 @@ function updateProgression() {
   fishProgressPercent.textContent = percentage.toFixed(0) + "%";
   if (percentage === 100) {
     launchConfetti();
+  }
+}
+
+//#########################################################endregion#########################################################
+
+//#########################################################region Achievements###############################################
+function getAllAchievements() {
+  const poissonsPechesArray = Object.values(poissonsPeches);
+
+  //100%
+  const numberOfFishTypes = Object.keys(poissonsPeches).length;
+  const percentage =
+    (numberOfFishTypes / poissonsDeMerAvecPourcentage.length) * 100;
+  if (percentage === 100) {
+    console.log("achievement all fish caught");
+  }
+
+  //shiny
+  const oneShinyCaught = poissonsPechesArray.some(
+    (fish) => fish.shiny === true
+  );
+  oneShinyCaught
+    ? console.log("shiny caught !")
+    : console.log("shiny not caught !");
+
+  //1st fish caught
+  if (poissonsPechesArray.length > 0) {
+    console.log("first fish caught !");
+  }
+
+  //1st fish caught
+  let total = 0;
+  poissonsPechesArray.forEach((fish) => {
+    total += fish.peches;
+  });
+  if (total >= 100) {
+    console.log("more than 100 fish caught ! " + total);
+  }
+
+  //100km
+  if (fishingStats.distanceTraveled >= distanceForAchievement) {
+    console.log("100 km ! " + total);
+  }
+
+  //50 fish escaped
+  if (fishingStats.escapedFish >= escapedFishForAchievement) {
+    console.log("50 fish escaped ! " + total);
   }
 }
 
