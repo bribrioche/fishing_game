@@ -20,9 +20,12 @@ let spacebarChallengeCompleted = true;
 let isClicked = false;
 let spacebarGameRunning = false;
 let moreThan100km = false;
+let soundOn = true;
 
 let randomFish;
+let timer;
 let timeout;
+let verticalBarAnimation;
 
 let fishingStats = {
   escapedFish: 0,
@@ -60,7 +63,12 @@ const poissonsDeMerAvecPourcentage = [
   { nom: "dorade", pourcentage: 6, tailleMinimale: 40, tailleMaximale: 70 },
   { nom: "sole", pourcentage: 18, tailleMinimale: 25, tailleMaximale: 70 },
   { nom: "tacaud", pourcentage: 7, tailleMinimale: 21, tailleMaximale: 40 },
-  { nom: "maquereau", pourcentage: 9, tailleMinimale: 30, tailleMaximale: 60 },
+  {
+    nom: "maquereau",
+    pourcentage: 9,
+    tailleMinimale: 30,
+    tailleMaximale: 60,
+  },
   { nom: "sardine", pourcentage: 16, tailleMinimale: 11, tailleMaximale: 15 },
   {
     nom: "requin bleu",
@@ -78,7 +86,7 @@ const poissonsDeMerAvecPourcentage = [
     nom: "crevette",
     pourcentage: 14,
     tailleMinimale: 3,
-    tcolorsailleMaximale: 5,
+    tailleMaximale: 5,
   },
   { nom: "homard", pourcentage: 11, tailleMinimale: 25, tailleMaximale: 60 },
   {
@@ -96,6 +104,8 @@ const chanceforLeviathor = 0.5;
 const distanceForAchievement = 10000;
 const escapedFishForAchievement = 50;
 
+const soundBtn = document.getElementById("soundBtn");
+const soundImage = document.getElementById("soundImg");
 const fishDetails = document.getElementById("fishDetails");
 const fishDetailImage = document.getElementById("fishDetailImage");
 const fishDetailImageShiny = document.getElementById("fishDetailImageShiny");
@@ -124,6 +134,7 @@ const txtNewFish = document.querySelector(".txtFish");
 splashScreen();
 init();
 animate();
+playMusic();
 
 //#########################################################region Init##################################################
 function init() {
@@ -267,44 +278,42 @@ function init() {
   controls.update();
 
   let soundIsPlaying = false;
-  const keyState = {};
-  waterSound.loop = true;
-  boatSound.loop = true;
+  const keyState = {
+    ArrowUp: false,
+    ArrowLeft: false,
+    ArrowRight: false,
+    z: false,
+    q: false,
+    d: false,
+  };
 
-  // Listeners
-  document.addEventListener("keydown", (event) => {
+  const handleKeyDown = (event) => {
     if (spacebarChallengeCompleted) {
       keyState[event.key] = true;
       moveSpeed = event.shiftKey ? 1 : 0.5;
-      if (event.key === "ArrowUp" && !soundIsPlaying) {
-        playBoatSound();
-        playWaterSound();
+      if ((event.key === "ArrowUp" || event.key === "z") && !soundIsPlaying) {
         soundIsPlaying = true;
+        // Ajoutez ici la logique pour jouer le son
       }
-    } else {
-      keyState[event.key] = false;
     }
-  });
+  };
 
-  document.addEventListener("keyup", (event) => {
+  const handleKeyUp = (event) => {
     if (spacebarChallengeCompleted) {
       keyState[event.key] = false;
       if (
         (event.key === "ArrowUp" || event.key === "z") &&
         !Object.values(keyState).some((key) => key === true)
       ) {
-        stopBoatSound();
-        stopWaterSound();
         soundIsPlaying = false;
+        // Ajoutez ici la logique pour arrêter le son
       }
-
-      if (event.key === "Shift") {
-        moveSpeed = 0.5;
-      }
-    } else {
-      keyState[event.key] = false;
+      moveSpeed = 0.5;
     }
-  });
+  };
+
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("keyup", handleKeyUp);
 
   showListButton.addEventListener("click", () => {
     const achievementsIsHidden =
@@ -331,10 +340,21 @@ function init() {
     showAchievementsButton.classList.toggle("clicked");
   });
 
+  soundBtn.addEventListener("click", () => {
+    soundOn = !soundOn;
+    if (soundOn) {
+      soundImage.src = "./images/soundOn.png";
+    } else {
+      soundImage.src = "./images/soundOff.png";
+    }
+    setAllSoundVolume(soundOn);
+  });
+
+  window.addEventListener("resize", onWindowResize);
+
   function updatePosition() {
     if (spacebarChallengeCompleted) {
       if (keyState["z"] || keyState["ArrowUp"]) {
-        boatSound.volume = 0.15;
         boat.position.z -= Math.sin(boatRotation) * moveSpeed;
         boat.position.x += Math.cos(boatRotation) * moveSpeed;
         fishingStats.distanceTraveled += moveSpeed;
@@ -348,13 +368,10 @@ function init() {
         }
       }
       if (keyState["q"] || keyState["ArrowLeft"]) {
-        boatSound.volume = 0.2;
         boatRotation += Math.PI / 180;
         boat.rotation.set(0, boatRotation, 0);
       }
       if (keyState["d"] || keyState["ArrowRight"]) {
-        boatSound.volume = 0.2;
-
         boatRotation -= Math.PI / 180;
         boat.rotation.set(0, boatRotation, 0);
       }
@@ -374,11 +391,11 @@ function init() {
   const ambientLight = new THREE.AmbientLight(0xffffff, 3);
   scene.add(ambientLight);
 
-  setInterval(createBlackSphere, 10000);
+  setInterval(createBlackSphere, 5000);
   updatePosition();
 
-  window.addEventListener("resize", onWindowResize);
   getAllAchievements();
+  setAllSoundVolume(soundOn);
 }
 
 function animate() {
@@ -416,7 +433,7 @@ function createBlackSphere() {
 
     scene.add(sphere);
     spheres.push(sphere);
-    if (spheres.length > 10) {
+    if (spheres.length > 15) {
       scene.remove(spheres[0]);
       spheres.shift();
     }
@@ -459,7 +476,7 @@ function detectCollision() {
           messageElement.style.display = "none";
           messageElement.style.pointerEvents = "none";
           startSpacebarChallenge();
-        }, 3000);
+        }, 1000);
 
         break;
       } else if (
@@ -494,7 +511,10 @@ function fishEscape(sphere, pos) {
       if (sphere.material.opacity <= 0) {
         fishingStats.escapedFish++;
         localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
-        if (fishingStats.escapedFish >= escapedFishForAchievement) {
+        if (
+          fishingStats.escapedFish >= escapedFishForAchievement &&
+          fishingStats.fiftyEscapedFish === false
+        ) {
           getAllAchievements();
         }
         clearInterval(intervalID);
@@ -536,7 +556,7 @@ function startSpacebarChallenge() {
   }
 
   //Update Time Remaining
-  const timer = setInterval(() => {
+  timer = setInterval(() => {
     timeRemaining--;
     if (timeRemaining >= 0) {
       updateRemainingTime(timeRemaining);
@@ -592,7 +612,7 @@ function startVerticalBarAnimation() {
     position += direction * speed;
   }, 10);
 
-  setTimeout(() => {
+  verticalBarAnimation = setTimeout(() => {
     clearInterval(animationInterval);
   }, 10000);
 }
@@ -670,8 +690,9 @@ function updateRemainingTime(timeRemaining) {
 }
 
 function showCongratulationsMessage() {
-  spacebarChallengeCompleted = true;
   clearTimeout(timeout);
+  clearTimeout(timer);
+  clearTimeout(verticalBarAnimation);
   const fishData = poissonsDeMerAvecPourcentage.find(
     (fish) => fish.nom === randomFish
   );
@@ -749,7 +770,8 @@ function showCongratulationsMessage() {
     messageElement.style.display = "none";
     detailNewFish.style.display = "none";
     randomImage.src = "./images/spaceBarSpam.png";
-  }, 3000);
+    spacebarChallengeCompleted = true;
+  }, 2000);
 }
 
 function setSegmentSize() {
@@ -839,12 +861,12 @@ function launchConfetti() {
 //#########################################################region SplashScreen###############################################
 function splashScreen() {
   document.addEventListener("DOMContentLoaded", () => {
-    const loadingBar = document.querySelector(".loading-bar"); // Mettez à jour la classe ici
+    const loadingBar = document.querySelector(".loading-bar");
     const splashScreen = document.querySelector(".splashScreen");
 
     let width = 0;
-    const duration = 500; // 1.5 secondes
-    const interval = 10; // Mettez à jour la barre de chargement toutes les 20 ms
+    const duration = 500;
+    const interval = 10;
     const increment = (interval / duration) * 100;
     let currentPercent = 0;
 
@@ -852,13 +874,11 @@ function splashScreen() {
       if (width >= 100) {
         clearInterval(loadingInterval);
         setTimeout(() => {
-          // Disparition du splash screen après la fin de la barre de chargement
           splashScreen.style.opacity = 0;
           setTimeout(() => {
             splashScreen.style.display = "none";
-            // Appeler la fonction pour lancer la pluie de confettis
-          }, 1000); // Attendre 1 seconde pour que le splash screen disparaisse complètement
-        }, 1000); // Attendre 1 seconde après l'atteinte de 100 % pour laisser le temps à l'animation de disparaître
+          }, 1000);
+        }, 1000);
       } else {
         width += increment;
         currentPercent += increment;
@@ -873,7 +893,6 @@ function splashScreen() {
 
 //#########################################################region Sound######################################################
 function playWaterSound() {
-  waterSound.volume = 0.2;
   waterSound.playbackRate = 1;
 
   waterSound.play().catch((error) => {
@@ -882,7 +901,6 @@ function playWaterSound() {
 }
 
 function playBoatSound() {
-  boatSound.volume = 0.1;
   boatSound.playbackRate = 1.1;
 
   boatSound.play().catch((error) => {
@@ -897,6 +915,38 @@ function stopWaterSound() {
 function stopBoatSound() {
   boatSound.pause();
   boatSound.currentTime = 0;
+}
+
+function playBubbleSound() {
+  funkyAudio.volume = 0.5;
+  funkyAudio.playbackRate = 1.1;
+
+  funkyAudio.play().catch((error) => {
+    console.error("Erreur de lecture du son : ", error);
+  });
+}
+
+function playMusic() {
+  music.volume = 0.5;
+  music.playbackRate = 1.1;
+  music.loop = true;
+  music.play().catch((error) => {
+    console.error("Erreur de lecture du son : ", error);
+  });
+}
+
+function setAllSoundVolume(isOn) {
+  if (isOn) {
+    music.volume = 0.5;
+    waterSound.volume = 0.2;
+    boatSound.volume = 0.1;
+    funkyAudio.volume = 0.5;
+  } else {
+    music.volume = 0;
+    waterSound.volume = 0;
+    boatSound.volume = 0;
+    funkyAudio.volume = 0;
+  }
 }
 //#########################################################endregion#########################################################
 
@@ -947,7 +997,7 @@ function updateFishingList() {
 
     const text = document.createElement("p");
     text.classList.add("fish-name");
-    text.textContent = `${poisson}`;
+    text.textContent = upcaseFirstLetter(poisson);
 
     textContainer.appendChild(text);
     fishItem.appendChild(image);
@@ -984,7 +1034,7 @@ function updateFishingList() {
     fishItem.addEventListener("mouseover", () => {
       let fishFound;
       for (const poisson in poissonsPeches) {
-        if (fishItem.textContent == poisson) {
+        if (fishItem.textContent == upcaseFirstLetter(poisson)) {
           fishFound = poisson;
         }
       }
@@ -998,7 +1048,6 @@ function updateFishingList() {
 
         // Search current fish
         let fishPourcentage = 0;
-        let isShiny = false;
         for (const fish of poissonsDeMerAvecPourcentage) {
           if (fish.nom === fishName) {
             fishPourcentage = fish.pourcentage;
@@ -1101,16 +1150,17 @@ function getAllAchievements() {
   const poissonsPechesArray = Object.values(poissonsPeches);
 
   achievementListElement.innerHTML = "";
+  const numberOfFishTypes = Object.keys(poissonsPeches).length;
 
   //1st fish caught
   if (poissonsPechesArray.length > 0) {
-    console.log("first fish caught !");
     addAchievementToHTML(
       "Première touche !",
       "./images/trophies/first.png",
       "Vous avez pêché votre premier poisson"
     );
     if (!fishingStats.firstCaught) {
+      showNewAchievementNotification();
       fishingStats.firstCaught = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1130,6 +1180,7 @@ function getAllAchievements() {
       "Vous avez pêché 100 poissons"
     );
     if (!fishingStats.hundredCaught) {
+      showNewAchievementNotification();
       fishingStats.hundredCaught = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1148,6 +1199,7 @@ function getAllAchievements() {
       "Vous avez pêché un shiny"
     );
     if (!fishingStats.oneShiny) {
+      showNewAchievementNotification();
       fishingStats.oneShiny = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1156,16 +1208,18 @@ function getAllAchievements() {
   }
 
   //All shiny caught Shiny hunter
-  const allShinyCaught = poissonsPechesArray.some(
-    (fish) => fish.shiny === false
-  );
-  if (allShinyCaught) {
+  let numberOfShinies = 0;
+  poissonsPechesArray.forEach((fish) => {
+    if (fish.shiny) numberOfShinies++;
+  });
+  if (numberOfShinies === numberOfFishTypes) {
     addAchievementToHTML(
       "Shiny hunter",
-      "./images/trophies/shiny.png",
+      "./images/trophies/allShinies.png",
       "Vous avez pêché toutes les versions shiny"
     );
     if (!fishingStats.allShiny) {
+      showNewAchievementNotification();
       fishingStats.allShiny = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1174,11 +1228,9 @@ function getAllAchievements() {
   }
 
   //100%
-  const numberOfFishTypes = Object.keys(poissonsPeches).length;
   const percentage =
     (numberOfFishTypes / poissonsDeMerAvecPourcentage.length) * 100;
   if (percentage === 100) {
-    console.log("achievement all fish caught");
     addAchievementToHTML(
       "100%",
       "./images/trophies/100.png",
@@ -1186,6 +1238,7 @@ function getAllAchievements() {
       "100% des espèces attrapées"
     );
     if (!fishingStats.allTypesCaught) {
+      showNewAchievementNotification();
       fishingStats.allTypesCaught = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1201,6 +1254,7 @@ function getAllAchievements() {
       "Vous avez parcourus 100 km en bateau"
     );
     if (!fishingStats.hundredKm) {
+      showNewAchievementNotification();
       fishingStats.hundredKm = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1216,6 +1270,7 @@ function getAllAchievements() {
       "Vous avez effrayé 50 poissons"
     );
     if (!fishingStats.fiftyEscapedFish) {
+      showNewAchievementNotification();
       fishingStats.fiftyEscapedFish = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1225,13 +1280,13 @@ function getAllAchievements() {
 
   //Leviathor shiny Chanceux
   if (fishingStats.isLeviathorCaught === true) {
-    console.log("leviathor found");
     addAchievementToHTML(
       "Bizarre ce poisson",
       "./images/trophies/leviathor_shiny.png",
       "Vous avez pêché Leviathor Shiny"
     );
     if (!fishingStats.isLeviathorCaught) {
+      showNewAchievementNotification();
       fishingStats.isLeviathorCaught = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1257,6 +1312,7 @@ function getAllAchievements() {
       "Vous avez pêché un poisson plus gros que 95% de son espèce"
     );
     if (!fishingStats.bigOne) {
+      showNewAchievementNotification();
       fishingStats.bigOne = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1277,6 +1333,24 @@ function isWithinXPercentMaxSize(fishName, caughtSize) {
   }
 
   return false; // Poisson non trouvé
+}
+
+function showNewAchievementNotification() {
+  const notification = document.querySelector(".notification");
+  const notificationImage = document.querySelector(".notification-image");
+
+  notificationImage.src = "./images/notification.png";
+  notification.classList.add("show", "slide-up");
+  playBubbleSound();
+
+  setTimeout(() => {
+    notification.classList.remove("show", "slide-up");
+    notification.classList.add("slide-down");
+
+    setTimeout(() => {
+      notification.classList.remove("slide-down");
+    }, 3000);
+  }, 1000);
 }
 //#########################################################endregion#########################################################
 
@@ -1331,7 +1405,7 @@ function setSpeed(nameFish) {
     (fish) => fish.nom === nameFish
   );
   const minSpeed = 5;
-  const maxSpeed = 10;
+  const maxSpeed = 15;
   if (fish) {
     const percentage = fish.pourcentage;
     const invertedPercentage = 100 - percentage;

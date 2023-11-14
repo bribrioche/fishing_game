@@ -230,6 +230,10 @@ p {
   cursor: pointer;
 }
 
+#fishDetailImageShiny {
+  margin-top: -20px;
+}
+
 .fish-text-container {
   display: flex;
   flex-direction: row;
@@ -318,6 +322,22 @@ p {
   width: 150px;
 }
 
+#soundBtn {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background-color: transparent;
+  border-style: none;
+}
+
+#sound :hover {
+  cursor: pointer;
+}
+
+.soundImg {
+  width: 70px;
+}
+
 .splashScreen {
   position: absolute;
   width: 100%;
@@ -325,7 +345,6 @@ p {
   z-index: 1000;
   background-image: url("../images/splashScreen.png");
   background-size: cover;
-  display: none;
 }
 
 .loading-progress-container {
@@ -443,4 +462,31 @@ p {
 
 .achievement-item-title {
   color: #fff;
+}
+
+.notification {
+  position: fixed;
+  bottom: -100px; /* Cache l'élément en dehors de l'écran */
+  left: 50%;
+  transform: translateX(-50%);
+  transition: bottom 0.5s ease-in-out; /* Animation pour le déplacement vers le bas */
+  z-index: 1000;
+}
+
+.notification-image {
+  width: 250px; /* Ajustez la taille selon vos besoins */
+  height: auto;
+}
+
+/* Classe pour afficher l'élément */
+.notification.show {
+  bottom: 20px; /* Fait apparaître l'élément en bas de l'écran */
+}
+
+.notification.slide-up {
+  bottom: -100px;
+}
+
+.notification.slide-down {
+  bottom: 20px;
 }
