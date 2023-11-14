@@ -161,6 +161,28 @@ div#listContainer {
   flex-direction: row;
 }
 
+div#achievementListElement {
+  position: absolute;
+  z-index: 1;
+  top: 78px;
+  left: 10px;
+  background-color: #141414;
+  border-color: #666666;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 0px 5px 5px 5px;
+  padding: 20px;
+  max-height: 80vh;
+  min-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff #141414;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
 .fish-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -208,8 +230,20 @@ p {
   cursor: pointer;
 }
 
+.fish-text-container {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
+}
+
 .fish-name {
   margin-top: -10px;
+}
+
+.shiny-icon {
+  width: 10px;
+  padding-right: 5px;
 }
 
 .fish-progress-container {
@@ -390,7 +424,23 @@ p {
   position: absolute;
   width: 15px;
   height: 8px;
-  background-color: red; /* Couleur initiale, peut être modifiée */
-  /* border-radius: 50%; */
+  background-color: red;
   pointer-events: none;
+}
+
+.achievement-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 0px;
+}
+
+.achievement-item-image {
+  width: 90px;
+  padding: 10px 15px;
+}
+
+.achievement-item-title {
+  color: #fff;
 }
