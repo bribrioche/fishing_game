@@ -278,42 +278,44 @@ function init() {
   controls.update();
 
   let soundIsPlaying = false;
-  const keyState = {
-    ArrowUp: false,
-    ArrowLeft: false,
-    ArrowRight: false,
-    z: false,
-    q: false,
-    d: false,
-  };
+  const keyState = {};
+  waterSound.loop = true;
+  boatSound.loop = true;
 
-  const handleKeyDown = (event) => {
+  // Listeners
+  document.addEventListener("keydown", (event) => {
     if (spacebarChallengeCompleted) {
       keyState[event.key] = true;
       moveSpeed = event.shiftKey ? 1 : 0.5;
       if ((event.key === "ArrowUp" || event.key === "z") && !soundIsPlaying) {
+        playBoatSound();
+        playWaterSound();
         soundIsPlaying = true;
-        // Ajoutez ici la logique pour jouer le son
       }
+    } else {
+      keyState[event.key] = false;
     }
-  };
+  });
 
-  const handleKeyUp = (event) => {
+  document.addEventListener("keyup", (event) => {
     if (spacebarChallengeCompleted) {
       keyState[event.key] = false;
       if (
         (event.key === "ArrowUp" || event.key === "z") &&
         !Object.values(keyState).some((key) => key === true)
       ) {
+        stopBoatSound();
+        stopWaterSound();
         soundIsPlaying = false;
-        // Ajoutez ici la logique pour arrêter le son
       }
-      moveSpeed = 0.5;
-    }
-  };
 
-  document.addEventListener("keydown", handleKeyDown);
-  document.addEventListener("keyup", handleKeyUp);
+      if (event.key === "Shift") {
+        moveSpeed = 0.5;
+      }
+    } else {
+      keyState[event.key] = false;
+    }
+  });
 
   showListButton.addEventListener("click", () => {
     const achievementsIsHidden =
@@ -877,6 +879,7 @@ function splashScreen() {
           splashScreen.style.opacity = 0;
           setTimeout(() => {
             splashScreen.style.display = "none";
+            showNewAchievementNotification();
           }, 1000);
         }, 1000);
       } else {
