@@ -921,7 +921,7 @@ function stopBoatSound() {
 }
 
 function playBubbleSound() {
-  funkyAudio.volume = 0.5;
+  funkyAudio.volume = 0.8;
   funkyAudio.playbackRate = 1.1;
 
   funkyAudio.play().catch((error) => {
@@ -943,7 +943,7 @@ function setAllSoundVolume(isOn) {
     music.volume = 0.5;
     waterSound.volume = 0.2;
     boatSound.volume = 0.1;
-    funkyAudio.volume = 0.5;
+    funkyAudio.volume = 0.8;
   } else {
     music.volume = 0;
     waterSound.volume = 0;
@@ -1344,15 +1344,15 @@ function showNewAchievementNotification() {
 
   notificationImage.src = "./images/notification.png";
   notification.classList.add("show", "slide-up");
-  playBubbleSound();
 
   setTimeout(() => {
+    playBubbleSound();
     notification.classList.remove("show", "slide-up");
     notification.classList.add("slide-down");
 
     setTimeout(() => {
       notification.classList.remove("slide-down");
-    }, 3000);
+    }, 2000);
   }, 1000);
 }
 //#########################################################endregion#########################################################
