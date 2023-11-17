@@ -4,5 +4,9 @@
   },
   "devDependencies": {
     "vite": "^4.5.0"
+  },
+  "scripts": {
+    "build": "vite build",
+    "preview": "vite preview --port 8080"
   }
 }

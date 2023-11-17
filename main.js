@@ -191,7 +191,7 @@ function init() {
   const fbxLoader = new FBXLoader();
 
   fbxLoader.load(
-    "./3d_models/boat.fbx",
+    "./assets/3d_models/boat.fbx",
     (object) => {
       boat = object;
       boat.position.set(0, 1.2, 0);
@@ -211,7 +211,7 @@ function init() {
     textureWidth: 512,
     textureHeight: 512,
     waterNormals: new THREE.TextureLoader().load(
-      "textures/waternormals.jpg",
+      "assets/textures/waternormals.jpg",
       function (texture) {
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       }
@@ -283,40 +283,6 @@ function init() {
   boatSound.loop = true;
 
   // Listeners
-  document.addEventListener("keydown", (event) => {
-    if (spacebarChallengeCompleted) {
-      keyState[event.key] = true;
-      moveSpeed = event.shiftKey ? 1 : 0.5;
-      if ((event.key === "ArrowUp" || event.key === "z") && !soundIsPlaying) {
-        playBoatSound();
-        playWaterSound();
-        soundIsPlaying = true;
-      }
-    } else {
-      keyState[event.key] = false;
-    }
-  });
-
-  document.addEventListener("keyup", (event) => {
-    if (spacebarChallengeCompleted) {
-      keyState[event.key] = false;
-      if (
-        (event.key === "ArrowUp" || event.key === "z") &&
-        !Object.values(keyState).some((key) => key === true)
-      ) {
-        stopBoatSound();
-        stopWaterSound();
-        soundIsPlaying = false;
-      }
-
-      if (event.key === "Shift") {
-        moveSpeed = 0.5;
-      }
-    } else {
-      keyState[event.key] = false;
-    }
-  });
-
   showListButton.addEventListener("click", () => {
     const achievementsIsHidden =
       achievementListElement.classList.contains("hidden");
@@ -345,18 +311,57 @@ function init() {
   soundBtn.addEventListener("click", () => {
     soundOn = !soundOn;
     if (soundOn) {
-      soundImage.src = "./images/soundOn.png";
+      soundImage.src = "./assets/images/soundOn.png";
     } else {
-      soundImage.src = "./images/soundOff.png";
+      soundImage.src = "./assets/images/soundOff.png";
     }
     setAllSoundVolume(soundOn);
   });
 
   window.addEventListener("resize", onWindowResize);
 
+  let movingForward = false;
+  let movingLeft = false;
+  let movingRight = false;
+
+  const handleKeyDown = (event) => {
+    if (spacebarChallengeCompleted) {
+      if (event.key === "ArrowUp" || event.key === "z") {
+        movingForward = true;
+      }
+      if (event.key === "ArrowLeft" || event.key === "q") {
+        movingLeft = true;
+      }
+      if (event.key === "ArrowRight" || event.key === "d") {
+        movingRight = true;
+      }
+      if (event.key === "v") {
+        moveSpeed = 1;
+      }
+    }
+  };
+
+  const handleKeyUp = (event) => {
+    if (event.key === "ArrowUp" || event.key === "z") {
+      movingForward = false;
+    }
+    if (event.key === "ArrowLeft" || event.key === "q") {
+      movingLeft = false;
+    }
+    if (event.key === "ArrowRight" || event.key === "d") {
+      movingRight = false;
+    }
+    if (event.key === "v") {
+      moveSpeed = 0.5;
+    }
+  };
+
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("keyup", handleKeyUp);
+
   function updatePosition() {
     if (spacebarChallengeCompleted) {
-      if (keyState["z"] || keyState["ArrowUp"]) {
+      if (movingForward) {
         boat.position.z -= Math.sin(boatRotation) * moveSpeed;
         boat.position.x += Math.cos(boatRotation) * moveSpeed;
         fishingStats.distanceTraveled += moveSpeed;
@@ -369,11 +374,11 @@ function init() {
           moreThan100km = true;
         }
       }
-      if (keyState["q"] || keyState["ArrowLeft"]) {
+      if (movingLeft) {
         boatRotation += Math.PI / 180;
         boat.rotation.set(0, boatRotation, 0);
       }
-      if (keyState["d"] || keyState["ArrowRight"]) {
+      if (movingRight) {
         boatRotation -= Math.PI / 180;
         boat.rotation.set(0, boatRotation, 0);
       }
@@ -468,7 +473,7 @@ function detectCollision() {
 
         messageElement.style.display = "flex";
         const image = document.getElementById("randomImage");
-        image.src = "./images/spaceBarSpam.png";
+        image.src = "./assets/images/spaceBarSpam.png";
 
         if (spacebarChallengeCompleted) {
           spacebarChallengeCompleted = false;
@@ -580,7 +585,7 @@ function startSpacebarChallenge() {
       progressContainer.style.display = "none";
       spacebarClickCount = 0;
       const image = document.getElementById("randomImage");
-      image.src = "./images/failed.png";
+      image.src = "./assets/images/failed.png";
       document.removeEventListener("keydown", handleSpacebarClick);
       spacebarGameRunning = false;
 
@@ -713,16 +718,16 @@ function showCongratulationsMessage() {
   image.classList.add("fish-image");
 
   if (isLeviathor) {
-    randomImage.src = "./images/leviathor.png";
+    randomImage.src = "./assets/images/leviathor.png";
     txtNewFish.textContent = "Leviathor Shiny - Wow !";
     fishingStats.isLeviathorCaught = true;
     localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     getAllAchievements();
   } else {
     if (isShiny) {
-      randomImage.src = "./images/shiny/" + randomFish + ".png";
+      randomImage.src = "./assets/images/shiny/" + randomFish + ".png";
     } else {
-      randomImage.src = "./images/" + randomFish + ".png";
+      randomImage.src = "./assets/images/" + randomFish + ".png";
     }
 
     if (poissonsPeches[randomFish]) {
@@ -771,7 +776,7 @@ function showCongratulationsMessage() {
     imgRecord.style.display = "none";
     messageElement.style.display = "none";
     detailNewFish.style.display = "none";
-    randomImage.src = "./images/spaceBarSpam.png";
+    randomImage.src = "./assets/images/spaceBarSpam.png";
     spacebarChallengeCompleted = true;
   }, 2000);
 }
@@ -879,7 +884,6 @@ function splashScreen() {
           splashScreen.style.opacity = 0;
           setTimeout(() => {
             splashScreen.style.display = "none";
-            showNewAchievementNotification();
           }, 1000);
         }, 1000);
       } else {
@@ -961,7 +965,7 @@ function setEmptyFishingList() {
 
     const image = document.createElement("img");
     image.classList.add("fish-image");
-    image.src = `./images/unknown.png`;
+    image.src = `./assets/images/unknown.png`;
     image.alt = "???";
 
     const text = document.createElement("p");
@@ -984,7 +988,7 @@ function updateFishingList() {
 
     const image = document.createElement("img");
     image.classList.add("fish-image");
-    image.src = `./images/${poisson}.png`;
+    image.src = `./assets/images/${poisson}.png`;
     image.alt = poisson;
 
     const textContainer = document.createElement("div");
@@ -993,7 +997,7 @@ function updateFishingList() {
     if (poissonsPeches[poisson].shiny) {
       const shinyStar = document.createElement("img");
       shinyStar.classList.add("shiny-icon");
-      shinyStar.src = "./images/star.png";
+      shinyStar.src = "./assets/images/star.png";
       shinyStar.alt = "Shiny";
       textContainer.appendChild(shinyStar);
     }
@@ -1019,7 +1023,7 @@ function updateFishingList() {
 
     const image = document.createElement("img");
     image.classList.add("fish-image");
-    image.src = `./images/unknown.png`;
+    image.src = `./assets/images/unknown.png`;
     image.alt = "???";
 
     const text = document.createElement("p");
@@ -1044,8 +1048,8 @@ function updateFishingList() {
 
       if (fishFound) {
         const fishCount = poissonsPeches[fishFound].peches || 0;
-        const fishImageSrc = `./images/${fishFound}.png`;
-        const fishImageShinySrc = `./images/shiny/${fishFound}.png`;
+        const fishImageSrc = `./assets/images/${fishFound}.png`;
+        const fishImageShinySrc = `./assets/images/shiny/${fishFound}.png`;
         const fishName = fishFound;
         const fishSize = poissonsPeches[fishFound].taille;
 
@@ -1081,7 +1085,7 @@ function updateFishingList() {
         fishMaxSize.textContent = "Taille max. obtenue : " + fishSize + " cm";
       } else {
         const fishName = "???";
-        const fishImageSrc = `./images/unknown.png`;
+        const fishImageSrc = `./assets/images/unknown.png`;
 
         fishDetailName.textContent = fishName;
         fishDetailCount.textContent = "???";
@@ -1159,7 +1163,7 @@ function getAllAchievements() {
   if (poissonsPechesArray.length > 0) {
     addAchievementToHTML(
       "Première touche !",
-      "./images/trophies/first.png",
+      "./assets/images/trophies/first.png",
       "Vous avez pêché votre premier poisson"
     );
     if (!fishingStats.firstCaught) {
@@ -1168,7 +1172,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./images/trophies/unknown.png", "???");
+    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
   }
 
   //100 fish caught
@@ -1179,7 +1183,7 @@ function getAllAchievements() {
   if (total >= 100) {
     addAchievementToHTML(
       "Pêche en grande quantité",
-      "./images/trophies/hundred.png",
+      "./assets/images/trophies/hundred.png",
       "Vous avez pêché 100 poissons"
     );
     if (!fishingStats.hundredCaught) {
@@ -1188,7 +1192,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./images/trophies/unknown.png", "???");
+    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
   }
 
   //shiny
@@ -1198,7 +1202,7 @@ function getAllAchievements() {
   if (oneShinyCaught) {
     addAchievementToHTML(
       "First shiny",
-      "./images/trophies/shiny.png",
+      "./assets/images/trophies/shiny.png",
       "Vous avez pêché un shiny"
     );
     if (!fishingStats.oneShiny) {
@@ -1207,7 +1211,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./images/trophies/unknown.png", "???");
+    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
   }
 
   //All shiny caught Shiny hunter
@@ -1218,7 +1222,7 @@ function getAllAchievements() {
   if (numberOfShinies === numberOfFishTypes) {
     addAchievementToHTML(
       "Shiny hunter",
-      "./images/trophies/allShinies.png",
+      "./assets/images/trophies/allShinies.png",
       "Vous avez pêché toutes les versions shiny"
     );
     if (!fishingStats.allShiny) {
@@ -1227,7 +1231,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./images/trophies/unknown.png", "???");
+    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
   }
 
   //100%
@@ -1236,7 +1240,7 @@ function getAllAchievements() {
   if (percentage === 100) {
     addAchievementToHTML(
       "100%",
-      "./images/trophies/100.png",
+      "./assets/images/trophies/100.png",
 
       "100% des espèces attrapées"
     );
@@ -1246,14 +1250,14 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./images/trophies/unknown.png", "???");
+    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
   }
 
   //100km VOYAGEUR
   if (fishingStats.distanceTraveled >= distanceForAchievement) {
     addAchievementToHTML(
       "Voyageur",
-      "./images/trophies/100km.png",
+      "./assets/images/trophies/100km.png",
       "Vous avez parcourus 100 km en bateau"
     );
     if (!fishingStats.hundredKm) {
@@ -1262,14 +1266,14 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./images/trophies/unknown.png", "???");
+    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
   }
 
   //50 fish escaped TROP RAPIDE
   if (fishingStats.escapedFish >= escapedFishForAchievement) {
     addAchievementToHTML(
       "Trop rapide",
-      "./images/trophies/50_escaped.png",
+      "./assets/images/trophies/50_escaped.png",
       "Vous avez effrayé 50 poissons"
     );
     if (!fishingStats.fiftyEscapedFish) {
@@ -1278,14 +1282,14 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./images/trophies/unknown.png", "???");
+    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
   }
 
   //Leviathor shiny Chanceux
   if (fishingStats.isLeviathorCaught === true) {
     addAchievementToHTML(
       "Bizarre ce poisson",
-      "./images/trophies/leviathor_shiny.png",
+      "./assets/images/trophies/leviathor_shiny.png",
       "Vous avez pêché Leviathor Shiny"
     );
     if (!fishingStats.isLeviathorCaught) {
@@ -1294,7 +1298,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./images/trophies/unknown.png", "???");
+    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
   }
 
   //5% du poids max PECHE AU GROS
@@ -1311,7 +1315,7 @@ function getAllAchievements() {
   if (isBigOneCaught) {
     addAchievementToHTML(
       "Pêche au gros",
-      "./images/trophies/big.png",
+      "./assets/images/trophies/big.png",
       "Vous avez pêché un poisson plus gros que 95% de son espèce"
     );
     if (!fishingStats.bigOne) {
@@ -1320,7 +1324,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./images/trophies/unknown.png", "???");
+    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
   }
 }
 
@@ -1342,7 +1346,7 @@ function showNewAchievementNotification() {
   const notification = document.querySelector(".notification");
   const notificationImage = document.querySelector(".notification-image");
 
-  notificationImage.src = "./images/notification.png";
+  notificationImage.src = "./assets/images/notification.png";
   notification.classList.add("show", "slide-up");
 
   setTimeout(() => {

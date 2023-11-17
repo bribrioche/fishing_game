@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Aventure Aquatique : Pêche à Gogo</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/ico" href="/assets/favicon-aa995720.ico" />
+
+    <script type="module" crossorigin src="/assets/index-9d1d92c2.js"></script>
+    <link rel="stylesheet" href="/assets/index-30acf5a0.css" />
+  </head>
+  <body>
+    <div class="splashScreen">
+      <div class="loading-progress-container">
+        <div class="loading-bar"></div>
+      </div>
+    </div>
+    <div class="fish-progress-container">
+      <div class="percent">
+        <div class="text">0%</div>
+      </div>
+      <div class="fish-progress-bar"></div>
+    </div>
+
+    <div class="property">
+      Développé par
+      <a class="link" href="http://bryan-guillot.fr" target="_blank">
+        <img class="imgLink" src="/assets/world-wide-web-8a1cf368.png" /> Bryan
+        Guillot</a
+      >
+    </div>
+
+    <button id="showListButton" onkeyup="event.preventDefault()">
+      <img src="/assets/Book-b0c881fa.png" class="imgBtn" />
+    </button>
+    <button id="showAchievementsButton" onkeyup="event.preventDefault()">
+      <img src="/assets/trophy-cc80d3d3.png" class="imgBtn" />
+    </button>
+    <div id="listContainer" class="hidden">
+      <div class="fish-grid"></div>
+    </div>
+    <div id="achievementListElement" class="hidden">
+      <div class="achievement-grid" id="achievementList"></div>
+    </div>
+
+    <div id="fishDetails" class="fish-details">
+      <h2 id="fishDetailName" class="detail">Nom du poisson</h2>
+      <img
+        id="fishDetailImage"
+        src="/assets/unknown-e5569f6b.png"
+        alt="???"
+        class="fish-detail-image"
+      />
+      <img
+        id="fishDetailImageShiny"
+        src="/assets/unknown-e5569f6b.png"
+        alt="???"
+        class="fish-detail-image"
+      />
+      <div class="details">
+        <p id="fishMaxSize" class="detail">Taille</p>
+        <p id="fishDetailCount" class="detail">Nombre de fois pêché: 0</p>
+        <p id="fishPercent" class="detail">Pourcentage</p>
+      </div>
+    </div>
+
+    <div class="progress-container">
+      <div class="game-container">
+        <div class="horizontal-bar-container">
+          <div class="progress-bar-segment segment-1"></div>
+          <div class="progress-bar-segment segment-2"></div>
+          <div class="progress-bar-segment segment-3"></div>
+          <div class="progress-bar-segment segment-4"></div>
+          <div class="progress-bar-segment segment-5"></div>
+        </div>
+        <div class="vertical-bar"></div>
+      </div>
+      <div class="time-remaining">
+        <span id="timeRemaining">10s</span><br />
+        <span id="counter">Ferrez !</span>
+      </div>
+    </div>
+    <div class="messageElement">
+      <div class="divImg">
+        <img
+          src="/assets/spaceBarSpam-771bd5f7.png"
+          class="imageSpam"
+          id="randomImage"
+        />
+        <div class="detailNewFish">
+          <div class="txtFish">poisson - 52 cm</div>
+          <img src="/assets/crown-ae6d0e08.png" class="imgRecord" />
+        </div>
+      </div>
+    </div>
+    <div class="notification">
+      <img
+        src="/assets/notification-43f617a8.png"
+        alt="Notification"
+        class="notification-image"
+      />
+    </div>
+    <button id="soundBtn" onkeyup="event.preventDefault()">
+      <img
+        src="/assets/soundOn-a2395447.png"
+        alt=""
+        class="soundImg"
+        id="soundImg"
+      />
+    </button>
+    <img src="/assets/directions-02331cf7.png" class="directions" />
+    <audio id="waterSound" src="sounds/waterSound.mp3"></audio>
+    <audio id="boatSound" src="sounds/boatSound.mp3"></audio>
+    <audio id="funkyAudio" src="sounds/notifSound.mp3"></audio>
+    <audio id="music" src="sounds/music.mp3"></audio>
+  </body>
+</html>
