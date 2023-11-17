@@ -152,8 +152,6 @@ function init() {
     }
   }
 
-  getAllAchievements();
-
   if (poissonsPechesStr) {
     poissonsPeches = JSON.parse(poissonsPechesStr);
     updateFishingList();
@@ -162,6 +160,7 @@ function init() {
     setEmptyFishingList();
   }
 
+  getAllAchievements();
   // Init
   renderer = new THREE.WebGLRenderer();
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -191,7 +190,7 @@ function init() {
   const fbxLoader = new FBXLoader();
 
   fbxLoader.load(
-    "./assets/3d_models/boat.fbx",
+    "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/3d_models/boat.fbx",
     (object) => {
       boat = object;
       boat.position.set(0, 1.2, 0);
@@ -211,7 +210,7 @@ function init() {
     textureWidth: 512,
     textureHeight: 512,
     waterNormals: new THREE.TextureLoader().load(
-      "assets/textures/waternormals.jpg",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/textures/waternormals.jpg",
       function (texture) {
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       }
@@ -277,8 +276,6 @@ function init() {
   controls.maxDistance = 200.0;
   controls.update();
 
-  let soundIsPlaying = false;
-  const keyState = {};
   waterSound.loop = true;
   boatSound.loop = true;
 
@@ -311,9 +308,11 @@ function init() {
   soundBtn.addEventListener("click", () => {
     soundOn = !soundOn;
     if (soundOn) {
-      soundImage.src = "./assets/images/soundOn.png";
+      soundImage.src =
+        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/soundOn.png";
     } else {
-      soundImage.src = "./assets/images/soundOff.png";
+      soundImage.src =
+        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/soundOff.png";
     }
     setAllSoundVolume(soundOn);
   });
@@ -473,7 +472,8 @@ function detectCollision() {
 
         messageElement.style.display = "flex";
         const image = document.getElementById("randomImage");
-        image.src = "./assets/images/spaceBarSpam.png";
+        image.src =
+          "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/spaceBarSpam.png";
 
         if (spacebarChallengeCompleted) {
           spacebarChallengeCompleted = false;
@@ -585,7 +585,8 @@ function startSpacebarChallenge() {
       progressContainer.style.display = "none";
       spacebarClickCount = 0;
       const image = document.getElementById("randomImage");
-      image.src = "./assets/images/failed.png";
+      image.src =
+        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/failed.png";
       document.removeEventListener("keydown", handleSpacebarClick);
       spacebarGameRunning = false;
 
@@ -718,16 +719,23 @@ function showCongratulationsMessage() {
   image.classList.add("fish-image");
 
   if (isLeviathor) {
-    randomImage.src = "./assets/images/leviathor.png";
+    randomImage.src =
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/leviathor.png";
     txtNewFish.textContent = "Leviathor Shiny - Wow !";
     fishingStats.isLeviathorCaught = true;
     localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     getAllAchievements();
   } else {
     if (isShiny) {
-      randomImage.src = "./assets/images/shiny/" + randomFish + ".png";
+      randomImage.src =
+        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/shiny/" +
+        randomFish +
+        ".png";
     } else {
-      randomImage.src = "./assets/images/" + randomFish + ".png";
+      randomImage.src =
+        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/" +
+        randomFish +
+        ".png";
     }
 
     if (poissonsPeches[randomFish]) {
@@ -762,7 +770,7 @@ function showCongratulationsMessage() {
       " cm";
 
     updateFishingList();
-
+    getAllAchievements();
     updateProgression();
 
     localStorage.setItem("poissonsPeches", JSON.stringify(poissonsPeches));
@@ -776,7 +784,8 @@ function showCongratulationsMessage() {
     imgRecord.style.display = "none";
     messageElement.style.display = "none";
     detailNewFish.style.display = "none";
-    randomImage.src = "./assets/images/spaceBarSpam.png";
+    randomImage.src =
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/spaceBarSpam.png";
     spacebarChallengeCompleted = true;
   }, 2000);
 }
@@ -965,7 +974,7 @@ function setEmptyFishingList() {
 
     const image = document.createElement("img");
     image.classList.add("fish-image");
-    image.src = `./assets/images/unknown.png`;
+    image.src = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/unknown.png`;
     image.alt = "???";
 
     const text = document.createElement("p");
@@ -988,7 +997,7 @@ function updateFishingList() {
 
     const image = document.createElement("img");
     image.classList.add("fish-image");
-    image.src = `./assets/images/${poisson}.png`;
+    image.src = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/${poisson}.png`;
     image.alt = poisson;
 
     const textContainer = document.createElement("div");
@@ -997,7 +1006,8 @@ function updateFishingList() {
     if (poissonsPeches[poisson].shiny) {
       const shinyStar = document.createElement("img");
       shinyStar.classList.add("shiny-icon");
-      shinyStar.src = "./assets/images/star.png";
+      shinyStar.src =
+        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/star.png";
       shinyStar.alt = "Shiny";
       textContainer.appendChild(shinyStar);
     }
@@ -1023,7 +1033,7 @@ function updateFishingList() {
 
     const image = document.createElement("img");
     image.classList.add("fish-image");
-    image.src = `./assets/images/unknown.png`;
+    image.src = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/unknown.png`;
     image.alt = "???";
 
     const text = document.createElement("p");
@@ -1048,8 +1058,8 @@ function updateFishingList() {
 
       if (fishFound) {
         const fishCount = poissonsPeches[fishFound].peches || 0;
-        const fishImageSrc = `./assets/images/${fishFound}.png`;
-        const fishImageShinySrc = `./assets/images/shiny/${fishFound}.png`;
+        const fishImageSrc = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/${fishFound}.png`;
+        const fishImageShinySrc = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/shiny/${fishFound}.png`;
         const fishName = fishFound;
         const fishSize = poissonsPeches[fishFound].taille;
 
@@ -1085,7 +1095,7 @@ function updateFishingList() {
         fishMaxSize.textContent = "Taille max. obtenue : " + fishSize + " cm";
       } else {
         const fishName = "???";
-        const fishImageSrc = `./assets/images/unknown.png`;
+        const fishImageSrc = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/unknown.png`;
 
         fishDetailName.textContent = fishName;
         fishDetailCount.textContent = "???";
@@ -1163,7 +1173,7 @@ function getAllAchievements() {
   if (poissonsPechesArray.length > 0) {
     addAchievementToHTML(
       "Première touche !",
-      "./assets/images/trophies/first.png",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/first.png",
       "Vous avez pêché votre premier poisson"
     );
     if (!fishingStats.firstCaught) {
@@ -1172,7 +1182,11 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
+    addAchievementToHTML(
+      "???",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
+      "???"
+    );
   }
 
   //100 fish caught
@@ -1183,7 +1197,7 @@ function getAllAchievements() {
   if (total >= 100) {
     addAchievementToHTML(
       "Pêche en grande quantité",
-      "./assets/images/trophies/hundred.png",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/hundred.png",
       "Vous avez pêché 100 poissons"
     );
     if (!fishingStats.hundredCaught) {
@@ -1192,7 +1206,11 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
+    addAchievementToHTML(
+      "???",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
+      "???"
+    );
   }
 
   //shiny
@@ -1202,7 +1220,7 @@ function getAllAchievements() {
   if (oneShinyCaught) {
     addAchievementToHTML(
       "First shiny",
-      "./assets/images/trophies/shiny.png",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/shiny.png",
       "Vous avez pêché un shiny"
     );
     if (!fishingStats.oneShiny) {
@@ -1211,7 +1229,11 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
+    addAchievementToHTML(
+      "???",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
+      "???"
+    );
   }
 
   //All shiny caught Shiny hunter
@@ -1219,10 +1241,10 @@ function getAllAchievements() {
   poissonsPechesArray.forEach((fish) => {
     if (fish.shiny) numberOfShinies++;
   });
-  if (numberOfShinies === numberOfFishTypes) {
+  if (poissonsPechesArray.length > 0 && numberOfShinies === numberOfFishTypes) {
     addAchievementToHTML(
       "Shiny hunter",
-      "./assets/images/trophies/allShinies.png",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/allShinies.png",
       "Vous avez pêché toutes les versions shiny"
     );
     if (!fishingStats.allShiny) {
@@ -1231,7 +1253,11 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
+    addAchievementToHTML(
+      "???",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
+      "???"
+    );
   }
 
   //100%
@@ -1240,7 +1266,7 @@ function getAllAchievements() {
   if (percentage === 100) {
     addAchievementToHTML(
       "100%",
-      "./assets/images/trophies/100.png",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/100.png",
 
       "100% des espèces attrapées"
     );
@@ -1250,14 +1276,18 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
+    addAchievementToHTML(
+      "???",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
+      "???"
+    );
   }
 
   //100km VOYAGEUR
   if (fishingStats.distanceTraveled >= distanceForAchievement) {
     addAchievementToHTML(
       "Voyageur",
-      "./assets/images/trophies/100km.png",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/100km.png",
       "Vous avez parcourus 100 km en bateau"
     );
     if (!fishingStats.hundredKm) {
@@ -1266,14 +1296,18 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
+    addAchievementToHTML(
+      "???",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
+      "???"
+    );
   }
 
   //50 fish escaped TROP RAPIDE
   if (fishingStats.escapedFish >= escapedFishForAchievement) {
     addAchievementToHTML(
       "Trop rapide",
-      "./assets/images/trophies/50_escaped.png",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/50_escaped.png",
       "Vous avez effrayé 50 poissons"
     );
     if (!fishingStats.fiftyEscapedFish) {
@@ -1282,14 +1316,18 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
+    addAchievementToHTML(
+      "???",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
+      "???"
+    );
   }
 
   //Leviathor shiny Chanceux
   if (fishingStats.isLeviathorCaught === true) {
     addAchievementToHTML(
       "Bizarre ce poisson",
-      "./assets/images/trophies/leviathor_shiny.png",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/leviathor_shiny.png",
       "Vous avez pêché Leviathor Shiny"
     );
     if (!fishingStats.isLeviathorCaught) {
@@ -1298,7 +1336,11 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
+    addAchievementToHTML(
+      "???",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
+      "???"
+    );
   }
 
   //5% du poids max PECHE AU GROS
@@ -1315,7 +1357,7 @@ function getAllAchievements() {
   if (isBigOneCaught) {
     addAchievementToHTML(
       "Pêche au gros",
-      "./assets/images/trophies/big.png",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/big.png",
       "Vous avez pêché un poisson plus gros que 95% de son espèce"
     );
     if (!fishingStats.bigOne) {
@@ -1324,7 +1366,11 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML("???", "./assets/images/trophies/unknown.png", "???");
+    addAchievementToHTML(
+      "???",
+      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
+      "???"
+    );
   }
 }
 
@@ -1346,7 +1392,8 @@ function showNewAchievementNotification() {
   const notification = document.querySelector(".notification");
   const notificationImage = document.querySelector(".notification-image");
 
-  notificationImage.src = "./assets/images/notification.png";
+  notificationImage.src =
+    "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/notification.png";
   notification.classList.add("show", "slide-up");
 
   setTimeout(() => {
