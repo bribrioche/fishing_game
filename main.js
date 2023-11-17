@@ -580,16 +580,15 @@ function startSpacebarChallenge() {
   timeout = setTimeout(() => {
     clearInterval(timer);
     if (!spacebarChallengeCompleted) {
-      messageElement.style.display = "flex";
-      progressBar.style.width = "0%";
-      progressContainer.style.display = "none";
-      spacebarClickCount = 0;
       const image = document.getElementById("randomImage");
       image.src =
         "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/failed.png";
+
       document.removeEventListener("keydown", handleSpacebarClick);
       spacebarGameRunning = false;
 
+      messageElement.style.display = "flex";
+      progressContainer.style.display = "none";
       setTimeout(() => {
         messageElement.style.display = "none";
         spacebarChallengeCompleted = true;
