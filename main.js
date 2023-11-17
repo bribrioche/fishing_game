@@ -4,8 +4,74 @@ import { Water } from "three/addons/objects/Water.js";
 import { Sky } from "three/addons/objects/Sky.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 
+import splashScreenImg from "./assets/images/splashScreen.png";
+import soundOffImg from "./assets/images/soundOff.png";
+import soundOnImg from "./assets/images/soundOn.png";
+import spaceBarImg from "./assets/images/spaceBarSpam.png";
+import leviathorImg from "./assets/images/leviathor.png";
+import starImg from "./assets/images/star.png";
+import notificationImg from "./assets/images/notification.png";
+
+import unknown from "./assets/images/unknown.png";
+
+import saumon from "./assets/images/saumon.png";
+import bar from "./assets/images/bar.png";
+import merlan from "./assets/images/merlan.png";
+import anguille from "./assets/images/anguille.png";
+import morue from "./assets/images/morue.png";
+import hareng from "./assets/images/hareng.png";
+import anguille_électrique from "./assets/images/anguille électrique.png";
+import poisson_globe from "./assets/images/poisson-globe.png";
+import dorade from "./assets/images/dorade.png";
+import sole from "./assets/images/sole.png";
+import tacaud from "./assets/images/tacaud.png";
+import maquereau from "./assets/images/maquereau.png";
+import sardine from "./assets/images/sardine.png";
+import requin_bleu from "./assets/images/requin bleu.png";
+import thon_rouge from "./assets/images/thon rouge.png";
+import crevette from "./assets/images/crevette.png";
+import homard from "./assets/images/homard.png";
+import calamar from "./assets/images/calamar.png";
+import moule from "./assets/images/moule.png";
+import palourde from "./assets/images/palourde.png";
+
+import saumonS from "./assets/images/shiny/saumon.png";
+import barS from "./assets/images/shiny/bar.png";
+import merlanS from "./assets/images/shiny/merlan.png";
+import anguilleS from "./assets/images/shiny/anguille.png";
+import morueS from "./assets/images/shiny/morue.png";
+import harengS from "./assets/images/shiny/hareng.png";
+import anguille_électriqueS from "./assets/images/shiny/anguille électrique.png";
+import poisson_globeS from "./assets/images/shiny/poisson-globe.png";
+import doradeS from "./assets/images/shiny/dorade.png";
+import soleS from "./assets/images/shiny/sole.png";
+import tacaudS from "./assets/images/shiny/tacaud.png";
+import maquereauS from "./assets/images/shiny/maquereau.png";
+import sardineS from "./assets/images/shiny/sardine.png";
+import requin_bleuS from "./assets/images/shiny/requin bleu.png";
+import thon_rougeS from "./assets/images/shiny/thon rouge.png";
+import crevetteS from "./assets/images/shiny/crevette.png";
+import homardS from "./assets/images/shiny/homard.png";
+import calamarS from "./assets/images/shiny/calamar.png";
+import mouleS from "./assets/images/shiny/moule.png";
+import palourdeS from "./assets/images/shiny/palourde.png";
+
+import unknownTrophy from "./assets/images/trophies/unknown.png";
+import escapedTrophy from "./assets/images/trophies/50_escaped.png";
+import hundredPercentTrophy from "./assets/images/trophies/100.png";
+import hundredkmTrophy from "./assets/images/trophies/100km.png";
+import allShiniesTrophy from "./assets/images/trophies/allShinies.png";
+import bigOneTrophy from "./assets/images/trophies/big.png";
+import firstOneTrophy from "./assets/images/trophies/first.png";
+import hundredTrophy from "./assets/images/trophies/hundred.png";
+import leviathorTrophy from "./assets/images/trophies/leviathor_shiny.png";
+import shinyTrophy from "./assets/images/trophies/shiny.png";
+
 let camera, scene, renderer;
 let controls, water, sun, boat;
+
+let imageSrc = "";
+let imageShinySrc = "";
 
 let moveSpeed = 0.5;
 let boatRotation = 0;
@@ -308,11 +374,9 @@ function init() {
   soundBtn.addEventListener("click", () => {
     soundOn = !soundOn;
     if (soundOn) {
-      soundImage.src =
-        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/soundOn.png";
+      soundImage.src = soundOnImg;
     } else {
-      soundImage.src =
-        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/soundOff.png";
+      soundImage.src = soundOffImg;
     }
     setAllSoundVolume(soundOn);
   });
@@ -472,8 +536,7 @@ function detectCollision() {
 
         messageElement.style.display = "flex";
         const image = document.getElementById("randomImage");
-        image.src =
-          "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/spaceBarSpam.png";
+        image.src = spaceBarImg;
 
         if (spacebarChallengeCompleted) {
           spacebarChallengeCompleted = false;
@@ -581,8 +644,7 @@ function startSpacebarChallenge() {
     clearInterval(timer);
     if (!spacebarChallengeCompleted) {
       const image = document.getElementById("randomImage");
-      image.src =
-        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/failed.png";
+      image.src = splashScreenImg;
 
       document.removeEventListener("keydown", handleSpacebarClick);
       spacebarGameRunning = false;
@@ -718,23 +780,19 @@ function showCongratulationsMessage() {
   image.classList.add("fish-image");
 
   if (isLeviathor) {
-    randomImage.src =
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/leviathor.png";
+    randomImage.src = leviathorImg;
     txtNewFish.textContent = "Leviathor Shiny - Wow !";
     fishingStats.isLeviathorCaught = true;
     localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     getAllAchievements();
   } else {
     if (isShiny) {
-      randomImage.src =
-        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/shiny/" +
-        randomFish +
-        ".png";
+      loadShinyPoissonImage(randomFish);
+
+      randomImage.src = imageShinySrc;
     } else {
-      randomImage.src =
-        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/" +
-        randomFish +
-        ".png";
+      loadPoissonImage(randomFish);
+      randomImage.src = imageSrc;
     }
 
     if (poissonsPeches[randomFish]) {
@@ -783,8 +841,7 @@ function showCongratulationsMessage() {
     imgRecord.style.display = "none";
     messageElement.style.display = "none";
     detailNewFish.style.display = "none";
-    randomImage.src =
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/spaceBarSpam.png";
+    randomImage.src = spaceBarImg;
     spacebarChallengeCompleted = true;
   }, 2000);
 }
@@ -973,7 +1030,7 @@ function setEmptyFishingList() {
 
     const image = document.createElement("img");
     image.classList.add("fish-image");
-    image.src = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/unknown.png`;
+    image.src = unknown;
     image.alt = "???";
 
     const text = document.createElement("p");
@@ -996,7 +1053,8 @@ function updateFishingList() {
 
     const image = document.createElement("img");
     image.classList.add("fish-image");
-    image.src = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/${poisson}.png`;
+    loadPoissonImage(poisson);
+    image.src = imageSrc;
     image.alt = poisson;
 
     const textContainer = document.createElement("div");
@@ -1005,8 +1063,7 @@ function updateFishingList() {
     if (poissonsPeches[poisson].shiny) {
       const shinyStar = document.createElement("img");
       shinyStar.classList.add("shiny-icon");
-      shinyStar.src =
-        "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/star.png";
+      shinyStar.src = starImg;
       shinyStar.alt = "Shiny";
       textContainer.appendChild(shinyStar);
     }
@@ -1032,7 +1089,7 @@ function updateFishingList() {
 
     const image = document.createElement("img");
     image.classList.add("fish-image");
-    image.src = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/unknown.png`;
+    image.src = unknown;
     image.alt = "???";
 
     const text = document.createElement("p");
@@ -1057,8 +1114,10 @@ function updateFishingList() {
 
       if (fishFound) {
         const fishCount = poissonsPeches[fishFound].peches || 0;
-        const fishImageSrc = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/${fishFound}.png`;
-        const fishImageShinySrc = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/shiny/${fishFound}.png`;
+        loadPoissonImage(fishFound);
+        loadShinyPoissonImage(fishFound);
+        const fishImageSrc = imageSrc;
+        const fishImageShinySrc = imageShinySrc;
         const fishName = fishFound;
         const fishSize = poissonsPeches[fishFound].taille;
 
@@ -1094,7 +1153,7 @@ function updateFishingList() {
         fishMaxSize.textContent = "Taille max. obtenue : " + fishSize + " cm";
       } else {
         const fishName = "???";
-        const fishImageSrc = `https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/unknown.png`;
+        const fishImageSrc = unknown;
 
         fishDetailName.textContent = fishName;
         fishDetailCount.textContent = "???";
@@ -1172,7 +1231,7 @@ function getAllAchievements() {
   if (poissonsPechesArray.length > 0) {
     addAchievementToHTML(
       "Première touche !",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/first.png",
+      firstOneTrophy,
       "Vous avez pêché votre premier poisson"
     );
     if (!fishingStats.firstCaught) {
@@ -1181,11 +1240,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML(
-      "???",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
-      "???"
-    );
+    addAchievementToHTML("???", unknownTrophy, "???");
   }
 
   //100 fish caught
@@ -1196,7 +1251,7 @@ function getAllAchievements() {
   if (total >= 100) {
     addAchievementToHTML(
       "Pêche en grande quantité",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/hundred.png",
+      hundredTrophy,
       "Vous avez pêché 100 poissons"
     );
     if (!fishingStats.hundredCaught) {
@@ -1205,11 +1260,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML(
-      "???",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
-      "???"
-    );
+    addAchievementToHTML("???", unknownTrophy, "???");
   }
 
   //shiny
@@ -1219,7 +1270,7 @@ function getAllAchievements() {
   if (oneShinyCaught) {
     addAchievementToHTML(
       "First shiny",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/shiny.png",
+      shinyTrophy,
       "Vous avez pêché un shiny"
     );
     if (!fishingStats.oneShiny) {
@@ -1228,11 +1279,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML(
-      "???",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
-      "???"
-    );
+    addAchievementToHTML("???", unknownTrophy, "???");
   }
 
   //All shiny caught Shiny hunter
@@ -1243,7 +1290,7 @@ function getAllAchievements() {
   if (poissonsPechesArray.length > 0 && numberOfShinies === numberOfFishTypes) {
     addAchievementToHTML(
       "Shiny hunter",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/allShinies.png",
+      allShiniesTrophy,
       "Vous avez pêché toutes les versions shiny"
     );
     if (!fishingStats.allShiny) {
@@ -1252,11 +1299,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML(
-      "???",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
-      "???"
-    );
+    addAchievementToHTML("???", unknownTrophy, "???");
   }
 
   //100%
@@ -1265,7 +1308,7 @@ function getAllAchievements() {
   if (percentage === 100) {
     addAchievementToHTML(
       "100%",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/100.png",
+      hundredPercentTrophy,
 
       "100% des espèces attrapées"
     );
@@ -1275,18 +1318,14 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML(
-      "???",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
-      "???"
-    );
+    addAchievementToHTML("???", unknownTrophy, "???");
   }
 
   //100km VOYAGEUR
   if (fishingStats.distanceTraveled >= distanceForAchievement) {
     addAchievementToHTML(
       "Voyageur",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/100km.png",
+      hundredkmTrophy,
       "Vous avez parcourus 100 km en bateau"
     );
     if (!fishingStats.hundredKm) {
@@ -1295,18 +1334,14 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML(
-      "???",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
-      "???"
-    );
+    addAchievementToHTML("???", unknownTrophy, "???");
   }
 
   //50 fish escaped TROP RAPIDE
   if (fishingStats.escapedFish >= escapedFishForAchievement) {
     addAchievementToHTML(
       "Trop rapide",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/50_escaped.png",
+      escapedTrophy,
       "Vous avez effrayé 50 poissons"
     );
     if (!fishingStats.fiftyEscapedFish) {
@@ -1315,18 +1350,14 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML(
-      "???",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
-      "???"
-    );
+    addAchievementToHTML("???", unknownTrophy, "???");
   }
 
   //Leviathor shiny Chanceux
   if (fishingStats.isLeviathorCaught === true) {
     addAchievementToHTML(
       "Bizarre ce poisson",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/leviathor_shiny.png",
+      leviathorTrophy,
       "Vous avez pêché Leviathor Shiny"
     );
     if (!fishingStats.isLeviathorCaught) {
@@ -1335,11 +1366,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML(
-      "???",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
-      "???"
-    );
+    addAchievementToHTML("???", unknownTrophy, "???");
   }
 
   //5% du poids max PECHE AU GROS
@@ -1356,7 +1383,7 @@ function getAllAchievements() {
   if (isBigOneCaught) {
     addAchievementToHTML(
       "Pêche au gros",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/big.png",
+      bigOneTrophy,
       "Vous avez pêché un poisson plus gros que 95% de son espèce"
     );
     if (!fishingStats.bigOne) {
@@ -1365,11 +1392,7 @@ function getAllAchievements() {
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
   } else {
-    addAchievementToHTML(
-      "???",
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/trophies/unknown.png",
-      "???"
-    );
+    addAchievementToHTML("???", unknownTrophy, "???");
   }
 }
 
@@ -1391,8 +1414,7 @@ function showNewAchievementNotification() {
   const notification = document.querySelector(".notification");
   const notificationImage = document.querySelector(".notification-image");
 
-  notificationImage.src =
-    "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/images/notification.png";
+  notificationImage.src = notificationImg;
   notification.classList.add("show", "slide-up");
 
   setTimeout(() => {
@@ -1472,5 +1494,149 @@ function setSpeed(nameFish) {
 
 function getRandomInRange(min, max) {
   return Math.random() * (max - min) + min;
+}
+//#########################################################endregion#########################################################
+
+//#########################################################region Images#####################################################
+function loadPoissonImage(nomPoisson) {
+  switch (nomPoisson) {
+    case "saumon":
+      imageSrc = saumon;
+      break;
+    case "bar":
+      imageSrc = bar;
+      break;
+    case "anguille":
+      imageSrc = anguille;
+      break;
+    case "moule":
+      imageSrc = moule;
+      break;
+    case "sole":
+      imageSrc = sole;
+      break;
+    case "sardine":
+      imageSrc = sardine;
+      break;
+    case "hareng":
+      imageSrc = hareng;
+      break;
+    case "merlan":
+      imageSrc = merlan;
+      break;
+    case "dorade":
+      imageSrc = dorade;
+      break;
+    case "palourde":
+      imageSrc = palourde;
+      break;
+    case "dorade":
+      imageSrc = dorade;
+      break;
+    case "poisson-globe":
+      imageSrc = poisson_globe;
+      break;
+    case "calamar":
+      imageSrc = calamar;
+      break;
+    case "morue":
+      imageSrc = morue;
+      break;
+    case "thon rouge":
+      imageSrc = thon_rouge;
+      break;
+    case "requin bleu":
+      imageSrc = requin_bleu;
+      break;
+    case "tacaud":
+      imageSrc = tacaud;
+      break;
+    case "maquereau":
+      imageSrc = maquereau;
+      break;
+    case "anguille électrique":
+      imageSrc = anguille_électrique;
+      break;
+    case "homard":
+      imageSrc = homard;
+      break;
+    case "crevette":
+      imageSrc = crevette;
+      break;
+
+    default:
+      imageSrc = "";
+  }
+}
+
+function loadShinyPoissonImage(nomPoisson) {
+  switch (nomPoisson) {
+    case "saumon":
+      imageShinySrc = saumonS;
+      break;
+    case "bar":
+      imageShinySrc = barS;
+      break;
+    case "anguille":
+      imageShinySrc = anguilleS;
+      break;
+    case "moule":
+      imageShinySrc = mouleS;
+      break;
+    case "sole":
+      imageShinySrc = soleS;
+      break;
+    case "sardine":
+      imageShinySrc = sardineS;
+      break;
+    case "hareng":
+      imageShinySrc = harengS;
+      break;
+    case "merlan":
+      imageShinySrc = merlanS;
+      break;
+    case "dorade":
+      imageShinySrc = doradeS;
+      break;
+    case "palourde":
+      imageShinySrc = palourdeS;
+      break;
+    case "dorade":
+      imageShinySrc = doradeS;
+      break;
+    case "poisson-globe":
+      imageShinySrc = poisson_globeS;
+      break;
+    case "calamar":
+      imageShinySrc = calamarS;
+      break;
+    case "morue":
+      imageShinySrc = morueS;
+      break;
+    case "thon rouge":
+      imageShinySrc = thon_rougeS;
+      break;
+    case "requin bleu":
+      imageShinySrc = requin_bleuS;
+      break;
+    case "tacaud":
+      imageShinySrc = tacaudS;
+      break;
+    case "maquereau":
+      imageShinySrc = maquereauS;
+      break;
+    case "anguille électrique":
+      imageShinySrc = anguille_électriqueS;
+      break;
+    case "homard":
+      imageShinySrc = homardS;
+      break;
+    case "crevette":
+      imageShinySrc = crevetteS;
+      break;
+
+    default:
+      imageShinySrc = "";
+  }
 }
 //#########################################################endregion#########################################################
