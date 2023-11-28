@@ -4,68 +4,69 @@ import { Water } from "three/addons/objects/Water.js";
 import { Sky } from "three/addons/objects/Sky.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 
-import splashScreenImg from "./assets/images/splashScreen.png";
-import soundOffImg from "./assets/images/soundOff.png";
-import soundOnImg from "./assets/images/soundOn.png";
-import spaceBarImg from "./assets/images/spaceBarSpam.png";
-import leviathorImg from "./assets/images/leviathor.png";
-import starImg from "./assets/images/star.png";
-import notificationImg from "./assets/images/notification.png";
+import splashScreenImg from "/assets/images/splashScreen.png";
+import soundOffImg from "/assets/images/soundOff.png";
+import soundOnImg from "/assets/images/soundOn.png";
+import spaceBarImg from "/assets/images/spaceBarSpam.png";
+import leviathorImg from "/assets/images/leviathor.png";
+import starImg from "/assets/images/star.png";
+import notificationImg from "/assets/images/notification.png";
+import failed from "/assets/images/failed.png";
 
-import unknown from "./assets/images/unknown.png";
+import unknown from "/assets/images/unknown.png";
 
-import saumon from "./assets/images/saumon.png";
-import bar from "./assets/images/bar.png";
-import merlan from "./assets/images/merlan.png";
-import anguille from "./assets/images/anguille.png";
-import morue from "./assets/images/morue.png";
-import hareng from "./assets/images/hareng.png";
-import anguille_électrique from "./assets/images/anguille électrique.png";
-import poisson_globe from "./assets/images/poisson-globe.png";
-import dorade from "./assets/images/dorade.png";
-import sole from "./assets/images/sole.png";
-import tacaud from "./assets/images/tacaud.png";
-import maquereau from "./assets/images/maquereau.png";
-import sardine from "./assets/images/sardine.png";
-import requin_bleu from "./assets/images/requin bleu.png";
-import thon_rouge from "./assets/images/thon rouge.png";
-import crevette from "./assets/images/crevette.png";
-import homard from "./assets/images/homard.png";
-import calamar from "./assets/images/calamar.png";
-import moule from "./assets/images/moule.png";
-import palourde from "./assets/images/palourde.png";
+import saumon from "/assets/images/saumon.png";
+import bar from "/assets/images/bar.png";
+import merlan from "/assets/images/merlan.png";
+import anguille from "/assets/images/anguille.png";
+import morue from "/assets/images/morue.png";
+import hareng from "/assets/images/hareng.png";
+import anguille_électrique from "/assets/images/anguille électrique.png";
+import poisson_globe from "/assets/images/poisson-globe.png";
+import dorade from "/assets/images/dorade.png";
+import sole from "/assets/images/sole.png";
+import tacaud from "/assets/images/tacaud.png";
+import maquereau from "/assets/images/maquereau.png";
+import sardine from "/assets/images/sardine.png";
+import requin_bleu from "/assets/images/requin bleu.png";
+import thon_rouge from "/assets/images/thon rouge.png";
+import crevette from "/assets/images/crevette.png";
+import homard from "/assets/images/homard.png";
+import calamar from "/assets/images/calamar.png";
+import moule from "/assets/images/moule.png";
+import palourde from "/assets/images/palourde.png";
 
-import saumonS from "./assets/images/shiny/saumon.png";
-import barS from "./assets/images/shiny/bar.png";
-import merlanS from "./assets/images/shiny/merlan.png";
-import anguilleS from "./assets/images/shiny/anguille.png";
-import morueS from "./assets/images/shiny/morue.png";
-import harengS from "./assets/images/shiny/hareng.png";
-import anguille_électriqueS from "./assets/images/shiny/anguille électrique.png";
-import poisson_globeS from "./assets/images/shiny/poisson-globe.png";
-import doradeS from "./assets/images/shiny/dorade.png";
-import soleS from "./assets/images/shiny/sole.png";
-import tacaudS from "./assets/images/shiny/tacaud.png";
-import maquereauS from "./assets/images/shiny/maquereau.png";
-import sardineS from "./assets/images/shiny/sardine.png";
-import requin_bleuS from "./assets/images/shiny/requin bleu.png";
-import thon_rougeS from "./assets/images/shiny/thon rouge.png";
-import crevetteS from "./assets/images/shiny/crevette.png";
-import homardS from "./assets/images/shiny/homard.png";
-import calamarS from "./assets/images/shiny/calamar.png";
-import mouleS from "./assets/images/shiny/moule.png";
-import palourdeS from "./assets/images/shiny/palourde.png";
+import saumonS from "/assets/images/shiny/saumon.png";
+import barS from "/assets/images/shiny/bar.png";
+import merlanS from "/assets/images/shiny/merlan.png";
+import anguilleS from "/assets/images/shiny/anguille.png";
+import morueS from "/assets/images/shiny/morue.png";
+import harengS from "/assets/images/shiny/hareng.png";
+import anguille_électriqueS from "/assets/images/shiny/anguille électrique.png";
+import poisson_globeS from "/assets/images/shiny/poisson-globe.png";
+import doradeS from "/assets/images/shiny/dorade.png";
+import soleS from "/assets/images/shiny/sole.png";
+import tacaudS from "/assets/images/shiny/tacaud.png";
+import maquereauS from "/assets/images/shiny/maquereau.png";
+import sardineS from "/assets/images/shiny/sardine.png";
+import requin_bleuS from "/assets/images/shiny/requin bleu.png";
+import thon_rougeS from "/assets/images/shiny/thon rouge.png";
+import crevetteS from "/assets/images/shiny/crevette.png";
+import homardS from "/assets/images/shiny/homard.png";
+import calamarS from "/assets/images/shiny/calamar.png";
+import mouleS from "/assets/images/shiny/moule.png";
+import palourdeS from "/assets/images/shiny/palourde.png";
 
-import unknownTrophy from "./assets/images/trophies/unknown.png";
-import escapedTrophy from "./assets/images/trophies/50_escaped.png";
-import hundredPercentTrophy from "./assets/images/trophies/100.png";
-import hundredkmTrophy from "./assets/images/trophies/100km.png";
-import allShiniesTrophy from "./assets/images/trophies/allShinies.png";
-import bigOneTrophy from "./assets/images/trophies/big.png";
-import firstOneTrophy from "./assets/images/trophies/first.png";
-import hundredTrophy from "./assets/images/trophies/hundred.png";
-import leviathorTrophy from "./assets/images/trophies/leviathor_shiny.png";
-import shinyTrophy from "./assets/images/trophies/shiny.png";
+import unknownTrophy from "/assets/images/trophies/unknown.png";
+import escapedTrophy from "/assets/images/trophies/50_escaped.png";
+import hundredPercentTrophy from "/assets/images/trophies/100.png";
+import hundredkmTrophy from "/assets/images/trophies/100km.png";
+import allShiniesTrophy from "/assets/images/trophies/allShinies.png";
+import bigOneTrophy from "/assets/images/trophies/big.png";
+import firstOneTrophy from "/assets/images/trophies/first.png";
+import hundredTrophy from "/assets/images/trophies/hundred.png";
+import leviathorTrophy from "/assets/images/trophies/leviathor_shiny.png";
+import shinyTrophy from "/assets/images/trophies/shiny.png";
 
 let camera, scene, renderer;
 let controls, water, sun, boat;
@@ -83,6 +84,7 @@ let colors = [];
 let poissonsPeches = {};
 
 let spacebarChallengeCompleted = true;
+let isLeviathorCaught = false;
 let isClicked = false;
 let spacebarGameRunning = false;
 let moreThan100km = false;
@@ -187,6 +189,9 @@ const listContainer = document.getElementById("listContainer");
 const achievementListElement = document.getElementById(
   "achievementListElement"
 );
+const horizontalBarContainer = document.querySelector(
+  ".horizontal-bar-container"
+);
 const counterElement = document.getElementById("counter");
 const fishGrid = document.querySelector(".fish-grid");
 const progressContainer = document.querySelector(".progress-container");
@@ -215,6 +220,9 @@ function init() {
     fishingStats = JSON.parse(progressionStr);
     if (fishingStats.distanceTraveled >= distanceForAchievement) {
       moreThan100km = true;
+    }
+    if (fishingStats.isLeviathorCaught) {
+      isLeviathorCaught = true;
     }
   }
 
@@ -644,7 +652,7 @@ function startSpacebarChallenge() {
     clearInterval(timer);
     if (!spacebarChallengeCompleted) {
       const image = document.getElementById("randomImage");
-      image.src = splashScreenImg;
+      image.src = failed;
 
       document.removeEventListener("keydown", handleSpacebarClick);
       spacebarGameRunning = false;
@@ -659,17 +667,14 @@ function startSpacebarChallenge() {
   }, 10000);
 }
 
+let animationInterval;
 function startVerticalBarAnimation() {
-  const horizontalBarContainer = document.querySelector(
-    ".horizontal-bar-container"
-  );
-
-  let position = 0;
-  let direction = 1;
   const speed = setSpeed(randomFish);
   const containerWidth = horizontalBarContainer.offsetWidth;
+  let position = 0;
+  let direction = 1;
 
-  const animationInterval = setInterval(() => {
+  animationInterval = setInterval(() => {
     verticalBar.style.left = position + "px";
 
     if (position >= containerWidth) {
@@ -762,6 +767,9 @@ function showCongratulationsMessage() {
   clearTimeout(timeout);
   clearTimeout(timer);
   clearTimeout(verticalBarAnimation);
+
+  clearInterval(animationInterval);
+
   const fishData = poissonsDeMerAvecPourcentage.find(
     (fish) => fish.nom === randomFish
   );
@@ -782,7 +790,7 @@ function showCongratulationsMessage() {
   if (isLeviathor) {
     randomImage.src = leviathorImg;
     txtNewFish.textContent = "Leviathor Shiny - Wow !";
-    fishingStats.isLeviathorCaught = true;
+    isLeviathorCaught = true;
     localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     getAllAchievements();
   } else {
@@ -1354,7 +1362,7 @@ function getAllAchievements() {
   }
 
   //Leviathor shiny Chanceux
-  if (fishingStats.isLeviathorCaught === true) {
+  if (isLeviathorCaught) {
     addAchievementToHTML(
       "Bizarre ce poisson",
       leviathorTrophy,
