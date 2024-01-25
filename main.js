@@ -5,6 +5,7 @@ import { Sky } from "three/addons/objects/Sky.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 
 import splashScreenImg from "/assets/images/splashScreen.png";
+import waterNormals from "/assets/textures/waternormals.jpg";
 import soundOffImg from "/assets/images/soundOff.png";
 import soundOnImg from "/assets/images/soundOn.png";
 import spaceBarImg from "/assets/images/spaceBarSpam.png";
@@ -35,6 +36,16 @@ import homard from "/assets/images/homard.png";
 import calamar from "/assets/images/calamar.png";
 import moule from "/assets/images/moule.png";
 import palourde from "/assets/images/palourde.png";
+import méduse from "/assets/images/méduse.png";
+import poisson_volant from "/assets/images/poisson volant.png";
+import poisson_clown from "/assets/images/poisson-clown.png";
+import poisson_chirurgien from "/assets/images/poisson-chirurgien.png";
+import marlin from "/assets/images/marlin.png";
+import orque from "/assets/images/orque.png";
+import oursin from "/assets/images/oursin.png";
+import scalaire from "/assets/images/scalaire.png";
+import poisson_flute from "/assets/images/poisson-flûte.png";
+import raie_manta from "/assets/images/raie manta.png";
 
 import saumonS from "/assets/images/shiny/saumon.png";
 import barS from "/assets/images/shiny/bar.png";
@@ -56,6 +67,16 @@ import homardS from "/assets/images/shiny/homard.png";
 import calamarS from "/assets/images/shiny/calamar.png";
 import mouleS from "/assets/images/shiny/moule.png";
 import palourdeS from "/assets/images/shiny/palourde.png";
+import méduseS from "/assets/images/shiny/méduse.png";
+import poisson_volantS from "/assets/images/shiny/poisson volant.png";
+import poisson_clownS from "/assets/images/shiny/poisson-clown.png";
+import poisson_chirurgienS from "/assets/images/shiny/poisson-chirurgien.png";
+import marlinS from "/assets/images/shiny/marlin.png";
+import orqueS from "/assets/images/shiny/orque.png";
+import oursinS from "/assets/images/shiny/oursin.png";
+import scalaireS from "/assets/images/shiny/scalaire.png";
+import poisson_fluteS from "/assets/images/shiny/poisson-flûte.png";
+import raie_mantaS from "/assets/images/shiny/raie manta.png";
 
 import unknownTrophy from "/assets/images/trophies/unknown.png";
 import escapedTrophy from "/assets/images/trophies/50_escaped.png";
@@ -79,6 +100,7 @@ let boatRotation = 0;
 let counter = 0;
 
 let spheres = [];
+let fishForSpheres = [];
 let colors = [];
 
 let poissonsPeches = {};
@@ -93,7 +115,9 @@ let soundOn = true;
 let randomFish;
 let timer;
 let timeout;
+let timeoutMessage;
 let verticalBarAnimation;
+let timoutEndDisplay;
 
 let fishingStats = {
   escapedFish: 0,
@@ -165,6 +189,46 @@ const poissonsDeMerAvecPourcentage = [
   },
   { nom: "moule", pourcentage: 17, tailleMinimale: 4, tailleMaximale: 5 },
   { nom: "palourde", pourcentage: 19, tailleMinimale: 3.5, tailleMaximale: 4 },
+  { nom: "méduse", pourcentage: 12, tailleMinimale: 25, tailleMaximale: 40 },
+  {
+    nom: "marlin",
+    pourcentage: 2,
+    tailleMinimale: 2000,
+    tailleMaximale: 4600,
+  },
+  {
+    nom: "poisson volant",
+    pourcentage: 7,
+    tailleMinimale: 15,
+    tailleMaximale: 30,
+  },
+  {
+    nom: "poisson-chirurgien",
+    pourcentage: 5,
+    tailleMinimale: 23,
+    tailleMaximale: 27,
+  },
+  {
+    nom: "poisson-clown",
+    pourcentage: 11,
+    tailleMinimale: 7,
+    tailleMaximale: 15,
+  },
+  { nom: "orque", pourcentage: 2, tailleMinimale: 5000, tailleMaximale: 8000 },
+  {
+    nom: "raie manta",
+    pourcentage: 8,
+    tailleMinimale: 4000,
+    tailleMaximale: 5000,
+  },
+  {
+    nom: "poisson-flûte",
+    pourcentage: 10,
+    tailleMinimale: 100,
+    tailleMaximale: 160,
+  },
+  { nom: "scalaire", pourcentage: 8, tailleMinimale: 12, tailleMaximale: 15 },
+  { nom: "oursin", pourcentage: 18, tailleMinimale: 3.5, tailleMaximale: 5 },
 ];
 
 const chanceforShiny = 5;
@@ -199,6 +263,7 @@ const progressBar = document.querySelector(".progress-bar");
 const messageElement = document.querySelector(".messageElement");
 const verticalBar = document.querySelector(".vertical-bar");
 const imgRecord = document.querySelector(".imgRecord");
+const imgShiny = document.querySelector(".imgShiny");
 const detailNewFish = document.querySelector(".detailNewFish");
 const txtNewFish = document.querySelector(".txtFish");
 
@@ -236,13 +301,15 @@ function init() {
 
   getAllAchievements();
   // Init
-  renderer = new THREE.WebGLRenderer();
+  renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.5;
   document.body.appendChild(renderer.domElement);
   scene = new THREE.Scene();
+
+  scene.matrixWorldAutoUpdate = true;
 
   // Camera
   camera = new THREE.PerspectiveCamera(
@@ -281,10 +348,10 @@ function init() {
   const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
 
   water = new Water(waterGeometry, {
-    textureWidth: 512,
-    textureHeight: 512,
+    textureWidth: 256,
+    textureHeight: 256,
     waterNormals: new THREE.TextureLoader().load(
-      "https://raw.githubusercontent.com/bribrioche/fishing_game/main/assets/textures/waternormals.jpg",
+      waterNormals,
       function (texture) {
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       }
@@ -307,7 +374,7 @@ function init() {
 
   const skyUniforms = sky.material.uniforms;
 
-  skyUniforms["turbidity"].value = 10;
+  skyUniforms["turbidity"].value = 0;
   skyUniforms["rayleigh"].value = 2;
   skyUniforms["mieCoefficient"].value = 0.005;
   skyUniforms["mieDirectionalG"].value = 0.8;
@@ -324,7 +391,7 @@ function init() {
 
   function updateSun() {
     const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
-    const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+    const theta = THREE.MathUtils.degToRad(parameters.azimuth / 2);
 
     sun.setFromSphericalCoords(1, phi, theta);
 
@@ -430,6 +497,14 @@ function init() {
   document.addEventListener("keydown", handleKeyDown);
   document.addEventListener("keyup", handleKeyUp);
 
+  const handleEscape = (event) => {
+    if (event.key === "Escape" && spacebarGameRunning) {
+      endFishing();
+    }
+  };
+
+  document.addEventListener("keydown", handleEscape);
+
   function updatePosition() {
     if (spacebarChallengeCompleted) {
       if (movingForward) {
@@ -446,11 +521,11 @@ function init() {
         }
       }
       if (movingLeft) {
-        boatRotation += Math.PI / 180;
+        boatRotation += (Math.PI / 180) * (moveSpeed * 2);
         boat.rotation.set(0, boatRotation, 0);
       }
       if (movingRight) {
-        boatRotation -= Math.PI / 180;
+        boatRotation -= (Math.PI / 180) * (moveSpeed * 2);
         boat.rotation.set(0, boatRotation, 0);
       }
     }
@@ -469,7 +544,7 @@ function init() {
   const ambientLight = new THREE.AmbientLight(0xffffff, 3);
   scene.add(ambientLight);
 
-  setInterval(createBlackSphere, 5000);
+  setInterval(createBlackSphere, 3000);
   updatePosition();
 
   getAllAchievements();
@@ -495,6 +570,13 @@ function render() {
 //#########################################################region Spheres####################################################
 function createBlackSphere() {
   if (boat) {
+    const newRandomFish = chaineAleatoireAvecPourcentage(
+      poissonsDeMerAvecPourcentage
+    );
+    // console.log(newRandomFish);
+    const selectedFish = poissonsDeMerAvecPourcentage.find(
+      (fish) => fish.nom === newRandomFish
+    );
     const geometry = new THREE.SphereGeometry(5, 32, 32);
     const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
     const sphere = new THREE.Mesh(geometry, material);
@@ -503,16 +585,23 @@ function createBlackSphere() {
     const angle = Math.random() * Math.PI * 2;
     const x = boat.position.x + Math.cos(angle) * radius;
     const z = boat.position.z + Math.sin(angle) * radius;
-    sphere.scale.set(0.6, 0.1, 0.2);
+    let newSize = 1;
+    if (selectedFish.pourcentage < 3) {
+      newSize *= 1.4;
+    }
+    if (selectedFish.pourcentage < 8) {
+      newSize *= 1.2;
+    }
+    sphere.scale.set(0.6 * newSize, 0.1 * newSize, 0.2 * newSize);
     sphere.position.set(x, 0, z);
     sphere.rotateY(Math.random() * 180);
     sphere.material.transparent = true;
     sphere.material.opacity = 1;
 
     scene.add(sphere);
-    spheres.push(sphere);
+    spheres.push([sphere, newRandomFish]);
     if (spheres.length > 15) {
-      scene.remove(spheres[0]);
+      scene.remove(spheres[0][0]);
       spheres.shift();
     }
   }
@@ -521,12 +610,14 @@ function createBlackSphere() {
 function updateSpheres() {
   const maxDistance = 1000;
 
-  for (let i = spheres.length - 1; i >= 0; i--) {
-    const sphere = spheres[i];
-    const distance = boat.position.distanceTo(sphere.position);
+  if (spheres.length > 0) {
+    for (let i = spheres.length - 1; i >= 0; i--) {
+      const sphere = spheres[i][0];
+      const distance = boat.position.distanceTo(sphere.position);
 
-    if (distance > maxDistance) {
-      spliceAndDeleteSphere(i, "to much spheres");
+      if (distance > maxDistance) {
+        spliceAndDeleteSphere(i, "to much spheres");
+      }
     }
   }
 }
@@ -536,24 +627,24 @@ function detectCollision() {
     const collisionDistance = 10;
 
     for (let i = 0; i < spheres.length; i++) {
-      const sphere = spheres[i];
+      const sphere = spheres[i][0];
       const distance = boat.position.distanceTo(sphere.position);
 
       if (distance < collisionDistance && !sphere.caught && moveSpeed < 0.9) {
-        spliceAndDeleteSphere(i, "Start mini Game");
-
+        randomFish = spheres[i][1];
         messageElement.style.display = "flex";
         const image = document.getElementById("randomImage");
         image.src = spaceBarImg;
+        spliceAndDeleteSphere(i, "Start mini Game");
 
         if (spacebarChallengeCompleted) {
           spacebarChallengeCompleted = false;
         }
 
-        setTimeout(() => {
+        timeoutMessage = setTimeout(() => {
           messageElement.style.display = "none";
           messageElement.style.pointerEvents = "none";
-          startSpacebarChallenge();
+          startSpacebarChallenge(i);
         }, 1000);
 
         break;
@@ -614,14 +705,14 @@ function spliceAndDeleteSphere(pos, text) {
   if (pos >= 0 && pos < spheres.length) {
     const removedSphere = spheres.splice(pos, 1)[0];
     if (removedSphere) {
-      scene.remove(removedSphere);
+      scene.remove(removedSphere[0]);
     }
   }
 }
 //#########################################################endregion#########################################################
 
 //#########################################################region Mini-Game##################################################
-function startSpacebarChallenge() {
+function startSpacebarChallenge(fishPos) {
   progressContainer.style.display = "block";
 
   let timeRemaining = 10;
@@ -642,7 +733,6 @@ function startSpacebarChallenge() {
   }, 1000);
 
   counter = 0;
-  randomFish = chaineAleatoireAvecPourcentage(poissonsDeMerAvecPourcentage);
   setSegmentSize();
 
   startVerticalBarAnimation();
@@ -763,9 +853,28 @@ function updateRemainingTime(timeRemaining) {
   document.getElementById("timeRemaining").textContent = `${timeRemaining}s`;
 }
 
+function endFishing() {
+  clearTimeout(timeout);
+  clearInterval(timer);
+  clearTimeout(verticalBarAnimation);
+  clearTimeout(timeoutMessage);
+  clearTimeout(timoutEndDisplay);
+
+  clearInterval(animationInterval);
+
+  progressContainer.style.display = "none";
+
+  imgRecord.style.display = "none";
+  imgShiny.style.display = "none";
+  messageElement.style.display = "none";
+  detailNewFish.style.display = "none";
+  randomImage.src = spaceBarImg;
+  spacebarChallengeCompleted = true;
+}
+
 function showCongratulationsMessage() {
   clearTimeout(timeout);
-  clearTimeout(timer);
+  clearInterval(timer);
   clearTimeout(verticalBarAnimation);
 
   clearInterval(animationInterval);
@@ -780,7 +889,19 @@ function showCongratulationsMessage() {
 
   const randomImage = document.getElementById("randomImage");
   const chance = getRandomInRange(0, 100);
-  const isShiny = chance < chanceforShiny;
+  let chanceforShinyCalculated = chanceforShiny * 1;
+  const poissonsPechesArray = Object.values(poissonsPeches);
+  let total = 0;
+  poissonsPechesArray.forEach((fish) => {
+    total += fish.peches;
+  });
+
+  if (total > 100) chanceforShinyCalculated = chanceforShiny * 1.5;
+  if (total > 500) chanceforShinyCalculated = chanceforShiny * 2;
+  if (total > 1000) chanceforShinyCalculated = chanceforShiny * 2.5;
+  if (total > 1300) chanceforShinyCalculated = chanceforShiny * 3;
+
+  const isShiny = chance < chanceforShinyCalculated;
   const chanceLeviathor = getRandomInRange(0, 100);
   const isLeviathor = chanceLeviathor < chanceforLeviathor;
 
@@ -809,6 +930,7 @@ function showCongratulationsMessage() {
 
       if (isShiny) {
         poissonsPeches[randomFish].shiny = true;
+        imgShiny.style.display = "block";
       }
 
       if (poissonsPeches[randomFish].taille < randomSize) {
@@ -845,8 +967,9 @@ function showCongratulationsMessage() {
   progressContainer.style.display = "none";
   detailNewFish.style.display = "flex";
 
-  setTimeout(() => {
+  timoutEndDisplay = setTimeout(() => {
     imgRecord.style.display = "none";
+    imgShiny.style.display = "none";
     messageElement.style.display = "none";
     detailNewFish.style.display = "none";
     randomImage.src = spaceBarImg;
@@ -1155,9 +1278,19 @@ function updateFishingList() {
         } else {
           fishDetailImageShiny.style.display = "none";
         }
-
-        fishPercent.textContent =
-          "Chance de pêcher un(e) " + fishName + " : " + fishPourcentage + "%";
+        let rarity = "";
+        if (fishPourcentage < 3) {
+          rarity = "Legendaire";
+        } else if (fishPourcentage < 5) {
+          rarity = "Très rare";
+        } else if (fishPourcentage < 10) {
+          rarity = "Rare";
+        } else if (fishPourcentage < 15) {
+          rarity = "Peu commun";
+        } else {
+          rarity = "Commun";
+        }
+        fishPercent.textContent = "Rareté : " + rarity;
         fishMaxSize.textContent = "Taille max. obtenue : " + fishSize + " cm";
       } else {
         const fishName = "???";
@@ -1184,6 +1317,7 @@ function updateProgression() {
     ".fish-progress-container"
   );
   const fishProgressBar = document.querySelector(".fish-progress-bar");
+  const fishProgressBar2 = document.querySelector(".fish-progress-bar2");
   const fishProgressPercent = document.querySelector(".text");
 
   const numberOfFishTypes = Object.keys(poissonsPeches).length;
@@ -1191,10 +1325,24 @@ function updateProgression() {
     (numberOfFishTypes / poissonsDeMerAvecPourcentage.length) * 100;
   fishProgressBar.style.width = percentage + "%";
 
-  fishProgressPercent.textContent = percentage.toFixed(0) + "%";
-  if (percentage === 100 && !fishingStats.allTypesCaught) {
-    launchConfetti();
+  const poissonsPechesArray = Object.values(poissonsPeches);
+  let numberOfFishShiny = 0;
+  for (let index = 0; index < poissonsPechesArray.length; index++) {
+    if (poissonsPechesArray[index].shiny) {
+      numberOfFishShiny++;
+    }
   }
+  const percentageShiny =
+    (numberOfFishShiny / poissonsDeMerAvecPourcentage.length) * 100;
+  fishProgressBar2.style.width = percentageShiny + "%";
+
+  let total = 0;
+  poissonsPechesArray.forEach((fish) => {
+    total += fish.peches;
+  });
+
+  fishProgressPercent.textContent =
+    percentage.toFixed(0) + "%" + " (" + total + ")";
 }
 
 function addAchievementToHTML(title, imagePath, description) {
@@ -1303,6 +1451,7 @@ function getAllAchievements() {
     );
     if (!fishingStats.allShiny) {
       showNewAchievementNotification();
+      launchConfetti();
       fishingStats.allShiny = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
     }
@@ -1321,6 +1470,7 @@ function getAllAchievements() {
       "100% des espèces attrapées"
     );
     if (!fishingStats.allTypesCaught) {
+      launchConfetti();
       showNewAchievementNotification();
       fishingStats.allTypesCaught = true;
       localStorage.setItem("fishingStats", JSON.stringify(fishingStats));
@@ -1571,6 +1721,36 @@ function loadPoissonImage(nomPoisson) {
     case "crevette":
       imageSrc = crevette;
       break;
+    case "poisson volant":
+      imageSrc = poisson_volant;
+      break;
+    case "poisson-clown":
+      imageSrc = poisson_clown;
+      break;
+    case "poisson-chirurgien":
+      imageSrc = poisson_chirurgien;
+      break;
+    case "marlin":
+      imageSrc = marlin;
+      break;
+    case "méduse":
+      imageSrc = méduse;
+      break;
+    case "orque":
+      imageSrc = orque;
+      break;
+    case "poisson-flûte":
+      imageSrc = poisson_flute;
+      break;
+    case "oursin":
+      imageSrc = oursin;
+      break;
+    case "raie manta":
+      imageSrc = raie_manta;
+      break;
+    case "scalaire":
+      imageSrc = scalaire;
+      break;
 
     default:
       imageSrc = "";
@@ -1641,6 +1821,36 @@ function loadShinyPoissonImage(nomPoisson) {
       break;
     case "crevette":
       imageShinySrc = crevetteS;
+      break;
+    case "poisson volant":
+      imageShinySrc = poisson_volantS;
+      break;
+    case "poisson-clown":
+      imageShinySrc = poisson_clownS;
+      break;
+    case "poisson-chirurgien":
+      imageShinySrc = poisson_chirurgienS;
+      break;
+    case "marlin":
+      imageShinySrc = marlinS;
+      break;
+    case "méduse":
+      imageShinySrc = méduseS;
+      break;
+    case "orque":
+      imageShinySrc = orqueS;
+      break;
+    case "poisson-flûte":
+      imageShinySrc = poisson_fluteS;
+      break;
+    case "oursin":
+      imageShinySrc = oursinS;
+      break;
+    case "raie manta":
+      imageShinySrc = raie_mantaS;
+      break;
+    case "scalaire":
+      imageShinySrc = scalaireS;
       break;
 
     default:

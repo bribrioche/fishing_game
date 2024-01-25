@@ -39,7 +39,9 @@ body {
 .txtFish {
   justify-self: center;
   align-self: center;
-  font-size: xx-large;
+  font-size: 45px;
+  -webkit-text-stroke-width: 0.8px;
+  -webkit-text-stroke-color: rgb(255, 255, 255);
 }
 
 .imgRecord {
@@ -47,6 +49,13 @@ body {
   width: 30px;
   height: 25px;
   rotate: 30deg;
+  transform: translate(-15px, -15px);
+}
+
+.imgShiny {
+  display: none;
+  width: 25;
+  height: 25px;
   transform: translate(-15px, -15px);
 }
 
@@ -99,6 +108,14 @@ button#showAchievementsButton,
 div#listContainer {
   position: absolute;
   z-index: 2; /* Assurez-vous que le bouton et la liste sont au-dessus du canvas */
+}
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  height: 5px; /* Ajustez selon la hauteur de la barre de progression */
+  width: 100%;
+  margin: -4px;
 }
 
 button#showListButton {
@@ -267,9 +284,17 @@ p {
 }
 
 .fish-progress-bar {
-  height: 10px; /* Ajustez selon la hauteur de la barre de progression */
+  height: 3px; /* Ajustez selon la hauteur de la barre de progression */
   width: 0%;
   background-color: #4caf50;
+  margin-bottom: 2px;
+  transition: width 0.2s ease-in;
+}
+
+.fish-progress-bar2 {
+  height: 3px; /* Ajustez selon la hauteur de la barre de progression */
+  width: 0%;
+  background-color: #d8a10a;
   transition: width 0.2s ease-in;
 }
 
