@@ -10,6 +10,6 @@ Developed in Vanilla JS with Three.js for 3D and Vite.js for compilation
 
 Install project packages with `npm i`
 
-Launch project in preview with `npm run preview`
-
 Build project in with `npm run build`
+
+Launch project in preview with `npm run preview`
